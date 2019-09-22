@@ -1,4 +1,8 @@
 # C/CPP Compiled objects.
 sol
+sol.*
 # Run output
 o
+t
+# Mac includes for testing
+stdc++.h
