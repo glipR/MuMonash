@@ -1,10 +1,13 @@
-# Superhot
+# Superhot - Recursive
 # AC
 
 e, l, r = map(int, input().split())
-enemies = list(map(int, input().split()))
-left_stack = list(map(int, input().split()))
-right_stack = list(map(int, input().split()))
+if e:
+    enemies = list(map(int, input().split()))
+if l:
+    left_stack = list(map(int, input().split()))
+if r:
+    right_stack = list(map(int, input().split()))
 
 import sys
 sys.setrecursionlimit(l + r + 10)
