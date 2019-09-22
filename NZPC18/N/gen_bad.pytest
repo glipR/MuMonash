@@ -1,0 +1,4 @@
+import random
+print(10000, 10000)
+for x in range(20000):
+    print(random.randint(1, 1000))
