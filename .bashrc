@@ -8,7 +8,8 @@ function runc {
 
     for i in *.in; do
         echo ---$F $i
-        ./sol <$i >o && (diff -y o ${i%in}[ao]?? >t || cat t) || cat o
+        time ./sol <$i >o
+        (diff -y o ${i%in}[ao]?? >t || cat t) || cat o
     done
 }
 
@@ -18,6 +19,7 @@ function runp {
     F=`ls -t *.py | head -n1`
     for i in *.in; do
         echo ---$F $i
-        python3 $F <$i >o && (diff -y o ${i%in}[ao]?? >t || cat t) || cat o
+        time python3 $F <$i >o
+        (diff -y o ${i%in}[ao]?? >t || cat t) || cat o
     done
 }
