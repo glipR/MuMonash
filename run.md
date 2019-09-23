@@ -13,7 +13,14 @@ function runc {
 
     for i in *.in; do
         echo ---$F $i
-        ./sol <$i >o && (diff -y o ${i%in}[ao]?? >t || cat t) || cat o
+        { time (./sol <$i >o 2>error) >/dev/null; } 2>timing
+        cat timing | grep real | awk '{print $2}'
+        cat error
+        # Not required
+        rm timing
+        rm error
+        # Required
+        diff -y o ${i%in}[ao]?? >t || cat t || cat o
     done
 }
 
@@ -23,9 +30,17 @@ function runp {
     F=`ls -t *.py | head -n1`
     for i in *.in; do
         echo ---$F $i
-        python3 $F <$i >o && (diff -y o ${i%in}[ao]?? >t || cat t) || cat o
+        { time (python3 $F <$i >o 2>error) >/dev/null; } 2>timing
+        cat timing | grep real | awk '{print $2}'
+        cat error
+        # Not required
+        rm timing
+        rm error
+        # Required
+        diff -y o ${i%in}[ao]?? >t || cat t || cat o
     done
 }
+
 ```
 3. Save (in `nano`, `Ctl-X`, then `Y`)
 
