@@ -1,6 +1,7 @@
 # C/CPP Compiled objects.
 sol
 sol.*
+a.out
 # Run output
 o
 t
