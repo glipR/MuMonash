@@ -6,3 +6,5 @@ o
 t
 # Mac includes for testing
 stdc++.h
+
+.DS_Store
