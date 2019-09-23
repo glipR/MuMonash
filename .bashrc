@@ -8,8 +8,14 @@ function runc {
 
     for i in *.in; do
         echo ---$F $i
-        { time (./sol <$i >o) >/dev/null; } 2>&1 | grep real | awk '{print $2}'
-        (diff -y o ${i%in}[ao]?? >t || cat t) || cat o
+        { time (./sol <$i >o 2>error) >/dev/null; } 2>timing
+        cat timing | grep real | awk '{print $2}'
+        cat error
+        # Not required
+        rm timing
+        rm error
+        # Required
+        diff -y o ${i%in}[ao]?? >t || cat t || cat o
     done
 }
 
@@ -19,15 +25,13 @@ function runp {
     F=`ls -t *.py | head -n1`
     for i in *.in; do
         echo ---$F $i
-        { time (python3 $F <$i >o) >/dev/null; } 2>timing
-        n=`wc -l < timing | xargs`
-        if [ $n -eq 4 ]
-        then
-            cat timing | grep real | awk '{print $2}'
-        else
-            cat timing
-        fi
+        { time (python3 $F <$i >o 2>error) >/dev/null; } 2>timing
+        cat timing | grep real | awk '{print $2}'
+        cat error
+        # Not required
         rm timing
+        rm error
+        # Required
         diff -y o ${i%in}[ao]?? >t || cat t || cat o
     done
 }
