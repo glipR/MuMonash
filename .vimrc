@@ -1,10 +1,11 @@
 set number
 set bs=indent,eol,start
-set ts=2 sw=2 et
+set ts=4 sw=4 et
 set list
 set ruler
 set autoindent
 set hlsearch
+set mouse=a
 syntax on
 syntax enable
 
