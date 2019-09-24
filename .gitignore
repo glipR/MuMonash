@@ -3,7 +3,6 @@ sol
 sol.*
 a.out
 # Run output
-o
 t
 # Mac includes for testing
 stdc++.h
