@@ -21,6 +21,9 @@ function runc {
         rm error
         # Required
         diff -y o ${i%in}[ao]?? >t || cat t || cat o
+        # Not required
+        rm o
+        rm t
     done
 }
 
@@ -38,6 +41,9 @@ function runp {
         rm error
         # Required
         diff -y o ${i%in}[ao]?? >t || cat t || cat o
+        # Not required
+        rm o
+        rm t
     done
 }
 
