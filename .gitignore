@@ -7,4 +7,5 @@ t
 # Mac includes for testing
 stdc++.h
 
+*.swp
 .DS_Store
