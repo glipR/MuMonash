@@ -1,0 +1,5 @@
+Fermat's Little Theorem:
+For prime $p$, we know that:
+1. $(a^p %= p) == a$.
+2. $(a^{p-1} %= p) == 1$.
+3. $(a^{p-2} %= p) == a^{-1}$.
