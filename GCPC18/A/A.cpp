@@ -22,7 +22,7 @@ typedef pair<int, int> pii;
 #define Y second
 
 template<typename T = int> struct LCA {
-    const int LOGN = 20;
+    int LOGN = 20;
     int n;
     vector<int> par, lvl;
     vector<vector<int>> anc;
@@ -32,7 +32,10 @@ template<typename T = int> struct LCA {
         par[u] = p, lvl[u] = l, len[u] = d;
         for (auto v: adj[u]) if (v.X != p) dfs(v.X, u, l+1, d+v.Y);
     }
-    LCA(int n): n(n), par(n), lvl(n), len(n), adj(n) {}
+    LCA(int n): n(n), par(n), lvl(n), len(n), adj(n) {
+        while ((1 << LOGN) > n) LOGN--;
+        LOGN++;
+    }
     void add_edge(int u, int v, T w = 1) {
         adj[u].emplace_back(v, w), adj[v].emplace_back(u, w);
     }
@@ -73,6 +76,7 @@ int main() {
     vector<pii> markers (m);
     vector<vector<bool>> marked(h, vector<bool>(w, false));
     vector<vector<bool>> reached(h, vector<bool>(w, false));
+    vector<vector<int>> marker_node_no(h, vector<int>(w, 0));
     for (int x=0; x<m; x++) {
         int i, j;
         cin >> i >> j >> ws;
@@ -81,8 +85,8 @@ int main() {
         marked[i][j] = true;
     }
 
-    // DFS, and generate the LCA.
-    LCA<int> lca(h * w + 5);
+    // DFS Once to find total node numbers, then DFS again and generate the LCA.
+    int GLOBAL_COUNTER = 1;
     vector<pair<pii, pii>> queue;
     queue.push_back(pair<pii, pii>(markers[0], pii(0, 0)));
     while (queue.size()) {
@@ -106,7 +110,44 @@ int main() {
 
         if ((neighbours.size() >= 2) || marked[popped.X.X][popped.X.Y]) {
             // Important, new vertex.
-            int vertex_num = popped.X.X * w + popped.X.Y + 3; // Add 3 so that the original vertex (0) isn't interferred.
+            GLOBAL_COUNTER += 1;
+            for (auto neighbour : neighbours) {
+                queue.push_back(pair<pii, pii>(neighbour, pii(GLOBAL_COUNTER, 1)));
+            }
+            //lca.add_edge(vertex_num, popped.Y.X, popped.Y.Y);
+        } else {
+            for (auto neighbour : neighbours) {
+                queue.push_back(pair<pii, pii>(neighbour, pii(popped.Y.X, popped.Y.Y + 1)));
+            }
+        }
+    }
+    LCA<int> lca(max(GLOBAL_COUNTER, m) + 5);
+    for (int i=0; i<h; i++) for (int j=0; j<w; j++) reached[i][j] = false;
+    GLOBAL_COUNTER = 0;
+    queue.push_back(pair<pii, pii>(markers[0], pii(GLOBAL_COUNTER, 0)));
+    while (queue.size()) {
+        pair<pii, pii> popped = queue[0];
+        reached[popped.X.X][popped.X.Y] = true;
+        queue.erase(queue.begin());
+        // What are the neighbours of popped?
+        vector<pii> neighbours;
+        if ((lines[popped.X.X + 1][2 * popped.X.Y + 1] != '_') && (popped.X.X + 1 != h) && !(reached[popped.X.X+1][popped.X.Y]))
+            // Attach bottom
+            neighbours.push_back(pii(popped.X.X + 1, popped.X.Y));
+        if ((lines[popped.X.X + 1][2 * popped.X.Y] != '|') && (popped.X.Y - 1 != -1) && !(reached[popped.X.X][popped.X.Y-1]))
+            // Attach left
+            neighbours.push_back(pii(popped.X.X, popped.X.Y-1));
+        if ((lines[popped.X.X + 1][2 * popped.X.Y + 2] != '|') && (popped.X.Y + 1 != w) && !(reached[popped.X.X][popped.X.Y+1]))
+            // Attach right
+            neighbours.push_back(pii(popped.X.X, popped.X.Y+1));
+        if ((lines[popped.X.X][2 * popped.X.Y + 1] != '_') && (popped.X.X - 1 != -1) && !(reached[popped.X.X-1][popped.X.Y]))
+            // Attach above
+            neighbours.push_back(pii(popped.X.X - 1, popped.X.Y));
+
+        if ((neighbours.size() >= 2) || marked[popped.X.X][popped.X.Y]) {
+            // Important, new vertex.
+            int vertex_num = ++GLOBAL_COUNTER;
+            marker_node_no[popped.X.X][popped.X.Y] = vertex_num;
             for (auto neighbour : neighbours) {
                 queue.push_back(pair<pii, pii>(neighbour, pii(vertex_num, 1)));
             }
@@ -122,8 +163,8 @@ int main() {
 
     ll covered = 0;
     for (int i=1; i<m; i++) {
-        int num1 = markers[i-1].X * w + markers[i-1].Y + 3;
-        int num2 = markers[i].X * w + markers[i].Y + 3;
+        int num1 = marker_node_no[markers[i-1].X][markers[i-1].Y];
+        int num2 = marker_node_no[markers[i].X][markers[i].Y];
         int node_num = lca.query(num1, num2);
         // cerr << num1 << ' ' << num2 << ' ' << node_num << endl;
         // cerr << lca.len[num1] << ' ' << lca.len[num2] << ' ' << lca.len[node_num] << endl << endl;
