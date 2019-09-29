@@ -1,0 +1,15 @@
+print(1000, 1000)
+
+print(' ' + '_ '*1000)
+left = True
+for x in range(999):
+    if left:
+        print('|' + ' ' + ' _' * 999 + '|')
+    else:
+        print('|' + '_ ' * 999 + ' ' + '|')
+    left = not left
+print('|' + '_ '*999 + '_' + '|')
+print(10000)
+import random
+for x in range(10000):
+    print(random.randint(1, 1000), random.randint(1, 1000))
