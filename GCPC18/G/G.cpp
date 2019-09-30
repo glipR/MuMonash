@@ -3,6 +3,7 @@
 #define _USE_MATH_DEFINES
 #include <cmath>
 #include <iostream>
+#include <iomanip>
 
 using namespace std;
 #define debug(a) cerr << #a << " = " << (a) << endl;
@@ -116,7 +117,7 @@ int main() {
         );
 
         if (km_dist <= longest_sat_dist) {
-            cout << km_dist / (long double) SPEEDLIGHT << endl;
+            cout << fixed << setprecision(10) << km_dist / (long double) SPEEDLIGHT << endl;
         } else {
             cout << "no signal" << endl;
         }
