@@ -34,6 +34,11 @@ int main() {
         cin >> x >> y >> ws;
         ll ax = round(x * 100000);
         ll ay = round(y * 100000);
+        if (ax == ay)
+        {
+            cout << 2 << ' ' << 2 << endl;
+            continue;
+        }
         ll u, v, g;
         // cout << ax << ' ' << ay << endl;
         g = gcd(ax, ay, u, v);
