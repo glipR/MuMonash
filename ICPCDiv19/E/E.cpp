@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <set>
 #include <queue>
+#include <cstring>
 
 #define pb(a) push_back(a)
 
@@ -81,7 +82,7 @@ void prim(int node)
 
 	bool covered[MAXN];
 	memset(covered, false, sizeof(covered));
-	set<Edge> edges;
+	multiset<Edge> edges;
 
 	covered[node] = 1;
 	for (int i = 0; i < in_vec[node].size(); i++)
@@ -106,7 +107,6 @@ void prim(int node)
 			edges.insert(in_vec[front.index][i]);
 		}
 	}
-	
 	groupWeight[group[node]] = res;
 }
 
@@ -114,7 +114,7 @@ ll kruskal()
 {
 	ll res = 0;
 	DisjointSet ds(groupsCnt);
-	set <Edge> edges;
+	multiset <Edge> edges;
 	for (int i = 0; i < groupsCnt; i++)
 		for (int j = 0; j < out_vec[i].size(); j++)
 			edges.insert(out_vec[i][j]);
@@ -156,7 +156,7 @@ void groupNodes()
 					int nei = in_vec[front][j].index;
 					if (group[nei] != -1) continue;
 					q.push(nei);
-					group[nei] = groupsCnt;
+					group[nei] = group[front];
 				}
 			}
 		}
@@ -201,7 +201,6 @@ int main()
 	for (int i = 0; i < n; i++)
 		if (groupWeight[group[i]] == -1)
 			prim(i);
-
 	
 	for (int i = 0; i < groupsCnt; i++)
 		for (int j = 0; j < groupsCnt; j++)
