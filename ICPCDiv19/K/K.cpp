@@ -1,6 +1,9 @@
 
 // MuMonash
-#include <bits/stdc++.h>
+#include <string>
+#include <vector>
+#include <cmath>
+#include <iostream>
 using namespace std;
 
 #define me (*this)
