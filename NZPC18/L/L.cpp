@@ -1,5 +1,6 @@
 #include <iostream>
 #include <algorithm>
+#include <set>
 
 using namespace std;
 
@@ -8,6 +9,13 @@ int cx, cy;
 inline bool cover(int bigger, int smaller, int distance)
 {
     return ((bigger - smaller) * cx) >= (cy * distance);
+}
+
+int tallest_covering(int height, int distance)
+{
+    double x = distance / cx;
+    x *= cy;
+    return height - x;
 }
 
 const int MAXN = 100001;
@@ -27,25 +35,32 @@ int main()
     while (r - l > 1)
     {
         int mid = (r + l) / 2;
-        int block = n - mid, distance = 1;
         bool happy = true;
+        int dist = 1;
+
+        multiset<int> remaining;
         for (int i = 0; i < n-mid; i++)
+            remaining.insert(h[i]);
+
+        for (int block = n-1; block >= n-mid; block--)
         {
-            if (block == n)
+            dist = 1;
+            while (!remaining.empty())
             {
-                happy = false;
-                break;
-            }
-            if (cover(h[block], h[i], distance))
-                distance++;
-            else {
-                block++;
-                distance = 1;
-                i--;
+                auto it = remaining.upper_bound(tallest_covering(h[block], dist));
+                if (it == remaining.begin())
+                    break;
+                it--;
+                if (cover(h[block], *it, dist))
+                {
+                    dist++;
+                    remaining.erase(it);
+                }
+                else break;
             }
         }
 
-        if (happy)
+        if (remaining.empty())
             r = mid;
         else l = mid;
     }
