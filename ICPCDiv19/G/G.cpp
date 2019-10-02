@@ -10,6 +10,8 @@
 
 using namespace std;
 
+typedef long long ll;
+
 struct Rectangle {
 
     int lx, ly, w, h;
@@ -30,7 +32,7 @@ struct left_less {
 
 int main() {
 
-    int best_dist = -1;
+    ll best_dist = -1;
 
     int n_red;
     cin >> n_red >> ws;
@@ -92,22 +94,26 @@ int main() {
             }
             // Free space between right_bound and rect.lx.
             // cerr << "Free from x " << right_bound << " to " << rect.lx << ", y " << special_points[i] << " to " << prev_top << endl;
-            int dist = 0;
-            if (blue.lx + blue.w < right_bound) dist += right_bound - blue.lx - blue.w;
-            if (blue.lx + blue.w > rect.lx) dist += blue.lx + blue.w - rect.lx;
-            if (blue.ly < special_points[i]) dist += special_points[i] - blue.ly;
-            if (blue.ly > prev_top) dist += blue.ly - prev_top;
+            int distx = 0;
+            int disty = 0;
+            if (blue.lx + blue.w < right_bound) distx += right_bound - blue.lx - blue.w;
+            if (blue.lx + blue.w > rect.lx) distx += blue.lx + blue.w - rect.lx;
+            if (blue.ly < special_points[i]) disty += special_points[i] - blue.ly;
+            if (blue.ly > prev_top) disty += blue.ly - prev_top;
+            ll dist = powl(distx, 2) + powl(disty, 2);
             if ((best_dist == -1) || (best_dist > dist)) best_dist = dist;
             right_bound = rect.lx + rect.w + blue.w;
         }
         if (right_bound <= bounding.lx + bounding.w) {
             // Free space between right_bound and rect.lx.
             // cerr << "Free from x " << right_bound << " to " << bounding.lx + bounding.w << ", y " << special_points[i] << " to " << prev_top << endl;
-            int dist = 0;
-            if (blue.lx + blue.w < right_bound) dist += right_bound - blue.lx - blue.w;
-            if (blue.lx + blue.w > bounding.lx + bounding.w) dist += blue.lx + blue.w - bounding.lx + bounding.w;
-            if (blue.ly < special_points[i]) dist += special_points[i] - blue.ly;
-            if (blue.ly > prev_top) dist += blue.ly - prev_top;
+            int distx = 0;
+            int disty = 0;
+            if (blue.lx + blue.w < right_bound) distx += right_bound - blue.lx - blue.w;
+            if (blue.lx + blue.w > bounding.lx + bounding.w) distx += blue.lx + blue.w - bounding.lx + bounding.w;
+            if (blue.ly < special_points[i]) disty += special_points[i] - blue.ly;
+            if (blue.ly > prev_top) disty += blue.ly - prev_top;
+            ll dist = powl(distx, 2) + powl(disty, 2);
             if ((best_dist == -1) || (best_dist > dist)) best_dist = dist;
         }
         prev_top = special_points[i];
@@ -118,7 +124,7 @@ int main() {
         cout << -1 << endl;
     } else {
         // cerr << best_dist << endl;
-        cout << setprecision(18) << powl(best_dist, 2) << endl;
+        cout << setprecision(18) << best_dist << endl;
     }
 
     return 0;
