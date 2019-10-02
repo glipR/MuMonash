@@ -83,6 +83,7 @@ int main() {
         sort(rects.begin(), rects.end(), left_less());
         int right_bound = bounding.lx + blue.w;
         for (auto rect: rects) {
+            if (right_bound > bounding.lx + bounding.w) break;
             if (rect.ly - blue.h >= prev_top) {
                 // cerr << "We can skip " << rect.lx << rect.ly << endl;
                 continue;
@@ -96,13 +97,17 @@ int main() {
             // cerr << "Free from x " << right_bound << " to " << rect.lx << ", y " << special_points[i] << " to " << prev_top << endl;
             int distx = 0;
             int disty = 0;
+            int left_next_bound = min(rect.lx, bounding.lx + bounding.w);
             if (blue.lx + blue.w < right_bound) distx += right_bound - (blue.lx + blue.w);
-            if (blue.lx + blue.w > rect.lx) distx += (blue.lx + blue.w) - rect.lx;
+            if (blue.lx + blue.w > left_next_bound) distx += (blue.lx + blue.w) - left_next_bound;
             if (blue.ly < special_points[i]) disty += special_points[i] - blue.ly;
             if (blue.ly > prev_top) disty += blue.ly - prev_top;
             ll dist = powl(distx, 2) + powl(disty, 2);
-            if ((best_dist == -1) || (best_dist > dist)) best_dist = dist;
-            right_bound = rect.lx + rect.w + blue.w;
+            if ((best_dist == -1) || (best_dist > dist)) {
+                best_dist = dist;
+                // cerr << best_dist << " Free from x " << right_bound << " to " << left_next_bound << ", y " << special_points[i] << " to " << prev_top << endl;
+            }
+            right_bound = left_next_bound + rect.w + blue.w;
         }
         if (right_bound <= bounding.lx + bounding.w) {
             // Free space between right_bound and rect.lx.
@@ -114,7 +119,10 @@ int main() {
             if (blue.ly < special_points[i]) disty += special_points[i] - blue.ly;
             if (blue.ly > prev_top) disty += blue.ly - prev_top;
             ll dist = powl(distx, 2) + powl(disty, 2);
-            if ((best_dist == -1) || (best_dist > dist)) best_dist = dist;
+            if ((best_dist == -1) || (best_dist > dist)) {
+                best_dist = dist;
+                // cerr << best_dist << " Free from x " << right_bound << " to " << bounding.lx + bounding.w << ", y " << special_points[i] << " to " << prev_top << endl;
+            }
         }
         prev_top = special_points[i];
 
