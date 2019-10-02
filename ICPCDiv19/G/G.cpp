@@ -96,8 +96,8 @@ int main() {
             // cerr << "Free from x " << right_bound << " to " << rect.lx << ", y " << special_points[i] << " to " << prev_top << endl;
             int distx = 0;
             int disty = 0;
-            if (blue.lx + blue.w < right_bound) distx += right_bound - blue.lx - blue.w;
-            if (blue.lx + blue.w > rect.lx) distx += blue.lx + blue.w - rect.lx;
+            if (blue.lx + blue.w < right_bound) distx += right_bound - (blue.lx + blue.w);
+            if (blue.lx + blue.w > rect.lx) distx += (blue.lx + blue.w) - rect.lx;
             if (blue.ly < special_points[i]) disty += special_points[i] - blue.ly;
             if (blue.ly > prev_top) disty += blue.ly - prev_top;
             ll dist = powl(distx, 2) + powl(disty, 2);
@@ -109,8 +109,8 @@ int main() {
             // cerr << "Free from x " << right_bound << " to " << bounding.lx + bounding.w << ", y " << special_points[i] << " to " << prev_top << endl;
             int distx = 0;
             int disty = 0;
-            if (blue.lx + blue.w < right_bound) distx += right_bound - blue.lx - blue.w;
-            if (blue.lx + blue.w > bounding.lx + bounding.w) distx += blue.lx + blue.w - bounding.lx + bounding.w;
+            if (blue.lx + blue.w < right_bound) distx += right_bound - (blue.lx + blue.w);
+            if (blue.lx + blue.w > bounding.lx + bounding.w) distx += (blue.lx + blue.w) - (bounding.lx + bounding.w);
             if (blue.ly < special_points[i]) disty += special_points[i] - blue.ly;
             if (blue.ly > prev_top) disty += blue.ly - prev_top;
             ll dist = powl(distx, 2) + powl(disty, 2);
