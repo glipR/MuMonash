@@ -1,0 +1,15 @@
+blue_range = [1, 5]
+red_range = [3, 100000]
+slider_range = [500000, 1000000]
+
+import random
+num_reds = random.randint(1, 5000)
+print(num_reds)
+def print_rect(max_size=100000):
+    print(random.randint(-1000000, 1000000), random.randint(-1000000, 1000000), random.randint(1, max_size), random.randint(1, max_size))
+# big slider
+print(-500000, -500000, 1000000, 1000000)
+#small blue
+print(random.randint(-1000000, 1000000), random.randint(-1000000, 1000000), 1, 1)
+for x in range(num_reds):
+    print_rect()

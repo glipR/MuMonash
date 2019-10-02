@@ -1,0 +1,7 @@
+import random
+num_reds = random.randint(1, 5000)
+print(num_reds)
+def print_rect():
+    print(random.randint(-1000000, 1000000), random.randint(-1000000, 1000000), random.randint(1, 1000000), random.randint(1, 1000000))
+for x in range(num_reds+2):
+    print_rect()
