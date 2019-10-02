@@ -13,7 +13,7 @@ ll gcd(ll a, ll b)
         swap(a, b);
     while (b != 0)
     {
-        int c = a % b;
+        ll c = a % b;
         a = b;
         b = c;
     }
@@ -35,25 +35,35 @@ struct Frac {
             return;
         }
         if (f.zero()) return;
-        ll newDen = (den * f.den) / gcd(den, f.den);
-        ll newNum = (newDen / den) * num + (newDen / f.den) * f.num;
+        ll newDen, newNum;
+        if (den == 0 && f.den == 0)
+        {
+            newDen = 0;
+            newNum = num + f.num;
+        }
+        else if (f.den == 0) 
+        {
+            newDen = 0;
+            newNum = den * f.num;
+        }
+        else if (den == 0)
+        {
+            newDen = 0;
+            newNum = f.den * num;
+        }
+        else
+        {
+            newDen = (den * f.den) / gcd(den, f.den);
+            newNum = (newDen / den) * num + (newDen / f.den) * f.num;
+        }
         num = newNum % MOD;
         den = newDen % MOD;
     }
 
     void subt(Frac f)
     {
-        if (zero())
-        {
-            num = -1 * f.num;
-            den = f.den;
-            return;
-        }
-        if (f.zero()) return;
-        ll newDen = (den * f.den) / gcd(den, f.den);
-        ll newNum = (newDen / den) * num - (newDen / f.den) * f.num;
-        num = newNum % MOD;
-        den = newDen % MOD;
+        f.num *= -1;
+        add(f);
     }
 
     void mult(ll i)
@@ -93,13 +103,10 @@ void check_row_self(int i)
     {
         if (eq[i][i].num == eq[i][i].den)
         {
-            // Shouldn't reach here! (Written in a way that gives RE but not CE)
-            int aa = 1;
-            int bb = 10;
-            cout << 1 / (10*aa - bb) << endl;
-            //cout << "WWWW" << endl;
+            // ignore... 
+            cerr << eq[i][i].num << ' ' << eq[i][i].den << endl;
         }
-        Frac change(1,1); 
+        Frac change(1,1);
         change.subt(eq[i][i]);
         change.inverse();
         eq[i][i].num = 0;
@@ -127,9 +134,9 @@ void reduce(int row)
 
 void print_row(int row) // debug function
 {
-    for (int i = 0; i <= n; i++)
-        cout << eq[row][i].num << '/' << eq[row][i].den << ", ";
-    cout << endl;
+    for (int i = 0; i < n; i++)
+        cerr << eq[row][i].num << '/' << eq[row][i].den << ", ";
+    cerr << "\t\t" << eq[row][n].num << '/' << eq[row][n].den << endl;
 }
 
 
@@ -154,6 +161,17 @@ ll inverse(ll x)
     return power(x, MOD-2);
 }
 
+void print_table(int i)
+{
+    return;
+    for (int row = 0; row < n; row++)
+    {
+        if (row == i)
+            cerr << "-> ";
+        else cerr << "   ";
+        print_row(row);
+    }
+}
 
 int main()
 {
@@ -178,15 +196,12 @@ int main()
 
 
     for (int i = n-1; i >= 0; i--)
-    {
-        /*for (int row = 0; row < n; row++)
-            print_row(row);
-        cout << "=======" << endl;*/
+    {     
         check_row_self(i);
         reduce(i);
+        check_row_self(i);
     }
-    //print_row(0);
-    //cout << 1 << endl;
+    while (eq[0][CONST].num < 0) eq[0][CONST].num += MOD;
+    while (eq[0][CONST].den < 0) eq[0][CONST].den += MOD;
     cout << (eq[0][CONST].num * inverse(eq[0][CONST].den)) % MOD << endl;
-
 }
