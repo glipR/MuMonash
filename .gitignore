@@ -9,3 +9,4 @@ stdc++.h
 
 *.swp
 .DS_Store
+*.dSYM
