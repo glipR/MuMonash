@@ -23,7 +23,7 @@ ll gcd(ll a, ll b)
 struct Frac {
     ll num;
     ll den;
-    Frac() { num = 0; den = 0; }
+    Frac() { num = 0; den = 1; }
     Frac(ll a, ll b){ num = a; den = b; }
 
     void add(Frac f)
@@ -34,6 +34,7 @@ struct Frac {
             den = f.den;
             return;
         }
+        if (f.zero()) return;
         ll newDen = (den * f.den) / gcd(den, f.den);
         ll newNum = (newDen / den) * num + (newDen / f.den) * f.num;
         num = newNum % MOD;
@@ -48,6 +49,7 @@ struct Frac {
             den = f.den;
             return;
         }
+        if (f.zero()) return;
         ll newDen = (den * f.den) / gcd(den, f.den);
         ll newNum = (newDen / den) * num - (newDen / f.den) * f.num;
         num = newNum % MOD;
@@ -62,6 +64,8 @@ struct Frac {
 
     void mult(Frac f)
     {
+        if (zero()) return;
+        if (f.zero()) { num = 0; return; }
         num *= f.num;
         den *= f.den;
 
@@ -83,6 +87,27 @@ int CONST;
 int n;
 Frac eq[MAXN][MAXN + 1];
 
+void check_row_self(int i)
+{
+    if (!eq[i][i].zero())
+    {
+        if (eq[i][i].num == eq[i][i].den)
+        {
+            // Shouldn't reach here! (Written in a way that gives RE but not CE)
+            int aa = 1;
+            int bb = 10;
+            cout << 1 / (10*aa - bb) << endl;
+            //cout << "WWWW" << endl;
+        }
+        Frac change(1,1); 
+        change.subt(eq[i][i]);
+        change.inverse();
+        eq[i][i].num = 0;
+        for (int col = 0; col <= n; col++)
+            eq[i][col].mult(change);
+    }
+}
+
 void reduce(int row)
 {
     for (int i = 0; i < row; i++)
@@ -97,23 +122,6 @@ void reduce(int row)
             eq[i][col].add(addition);
         }
         eq[i][row].num = 0;
-
-        if (!eq[i][i].zero())
-        {
-            if (eq[i][i].num == eq[i][i].den)
-            {
-                // Shouldn't reach here! (Written in a way that gives RE but not CE)
-                int aa = 1;
-                int bb = 10;
-                cout << 1 / (10*aa - bb) << endl;
-            }
-            Frac change(1,1); 
-            change.subt(eq[i][i]);
-            change.inverse();
-            eq[i][i].num = 0;
-            for (int col = 0; col <= n; col++)
-                eq[i][col].mult(change);
-        }
     }
 }
 
@@ -159,6 +167,7 @@ int main()
         for (int j = 0; j < 6; j++)
         {
             int dest = i + j + 1;
+            if (dest >= n-1) continue;
             if (x[dest] != 0) dest = x[dest]-1;
 
             eq[i][dest].add(Frac(1,6));
@@ -168,15 +177,16 @@ int main()
     }
 
 
-    for (int i = n-1; i >= 1; i--)
+    for (int i = n-1; i >= 0; i--)
     {
         /*for (int row = 0; row < n; row++)
             print_row(row);
         cout << "=======" << endl;*/
+        check_row_self(i);
         reduce(i);
     }
     //print_row(0);
-
+    //cout << 1 << endl;
     cout << (eq[0][CONST].num * inverse(eq[0][CONST].den)) % MOD << endl;
 
 }

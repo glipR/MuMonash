@@ -1,0 +1,24 @@
+2
+start "target"
+start = start "target" .
+start = .
+
+6
+start "target"
+q = q q .
+q = a .
+a = "target" .
+start = q start .
+q = "target" .
+start = .
+
+6
+start "target"
+q = q q .
+q = a .
+a = "targetdwqdqw" .
+start = q start .
+q = "target" .
+start = .
+
+0
