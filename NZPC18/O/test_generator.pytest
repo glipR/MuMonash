@@ -1,0 +1,19 @@
+import random
+num_squares = random.randint(2, 100)
+
+print(num_squares)
+
+matrix = [-1] * num_squares
+for x in range(num_squares-1):
+    if matrix[x] != -1:
+        continue
+    if random.random() > 0.6:
+        rand = random.randint(1, num_squares)
+        matrix[rand-1] = 0
+        matrix[x] = rand
+    else:
+        matrix[x] = 0
+matrix[-1] = 0
+
+print(' '.join(map(str, matrix)))
+

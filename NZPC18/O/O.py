@@ -39,7 +39,7 @@ for x in range(n):
                     if values[y+z] == 0:
                         reachable[y+z] = True
                     else:
-                        reachable[values[y+z]] = True
+                        reachable[values[y+z]-1] = True
                 reachable[-1] = True
 
 # Generate matrix of relationships
