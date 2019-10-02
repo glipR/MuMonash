@@ -9,8 +9,8 @@ for x in range(num_squares-1):
         continue
     if random.random() > 0.6:
         rand = random.randint(1, num_squares)
-        matrix[rand-1] = 0
         matrix[x] = rand
+        matrix[rand-1] = 0
     else:
         matrix[x] = 0
 matrix[-1] = 0
