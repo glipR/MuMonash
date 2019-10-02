@@ -1,0 +1,9 @@
+5
+start "target"
+start = a .
+a = b .
+a = "target" b .
+b = c .
+c = a .
+
+0

@@ -1,0 +1,41 @@
+3
+start "target"
+start = start start .
+start = .
+start = "target" .
+
+5
+start "target"
+start = a b .
+a = "ss" .
+b = c d .
+c = d .
+d = "nothing" .
+
+1
+start "target"
+start = "target" start .
+
+1
+start "target"
+start = "targeT" .
+
+6
+start "target"
+start = a b c d .
+a = b c d .
+b = c d .
+c = d .
+d = "target" .
+d = .
+
+6
+start "target"
+start = a b c d .
+a = b c d .
+b = c d .
+c = d .
+d = "target" .
+start = "target" "abcde" "qwertyu" .
+
+0
