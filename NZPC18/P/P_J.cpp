@@ -4,124 +4,200 @@
 #include <string>
 #include <iostream>
 #include <map>
+#include <algorithm>
 #include <queue>
-
-#define X first
-#define Y second
+#include <functional>
 
 using namespace std;
 
 typedef pair<int, int> pii;
+typedef vector<int> vi;
+typedef pair<pii, vector<pii> > rule1;             // Used for g values
+typedef pair<pair<pii, pii>, vector<pii> > rule2;  // Used for f values
+
+#define X first
+#define Y second
+
+#define rno1 X.X
+#define smallest_dist1 X.Y
+
+#define rno2 X.X.X
+#define minimum_dist2 X.X.Y
+#define minimum_change2 X.Y.X
+#define terms_considered2 X.Y.Y
+
 
 struct RuleStorage {
-    typedef pair<pii, vector<pii> > rule;
 
     int n_rules;
-    int counter;
+    int t_counter;
     int r_counter;
-    string identifier;
     map<string, int> terminals;
-    vector<vector<int> > used_in;  // What rules do I affect?
-    vector<vector<int> > generated_by;  // What rules have me as an end result?
-    vector<int> best_rule;  // What is the best rule (Smallest evaluated.)
-    vector<rule> rules;  // What are the rules?
-    vector<int> g;  // Shortest length?
-    queue<int> expanding;  // What clauses are needing to be expanded?
+    vi g;
+    vi f;
+    vector<vi> used_in;
+    string identifier;
+    vector<rule1> rule1s;
+    vector<rule2> rule2s;
+    vi generates;
 
-    RuleStorage(int n, string clause, string ident) : n_rules(n), counter(0), r_counter(0), used_in(0), best_rule(0), rules(n) {
+    RuleStorage(int nrules, string clause, string ident): n_rules(nrules), r_counter(0), t_counter(0), rule1s(nrules), rule2s(nrules) {
         identifier = ident;
         add_terminal(clause);
     }
 
-    void add_terminal(string t) {
-        cerr << t << " is " << counter << endl;
-        terminals[t] = counter++;
-        best_rule.push_back(-1);
-        used_in.push_back(vector<int>());
-        g.push_back(-1);
-        generated_by.push_back(vector<int>());
+    void dbg_rule1(rule1 r) {
+        cerr << "Rule #" << r.rno1 << " has min dist " << r.smallest_dist1 << " and " << r.Y.size() << " remaining terminals." << endl;
+    }
+    void dbg_rule2(rule2 r) {
+        cerr << "Rule #" << r.rno2 << " has min dist " << r.minimum_dist2 << " and " << r.minimum_change2 << " minimum change with " << r.Y.size() << " remaining checks." << endl;
     }
 
-    void add_rule(string t1, vector<string> result) {
+    int add_terminal(string t1) {
+        // cerr << t1 << " is " << t_counter << endl;
+        terminals[t1] = t_counter;
+        used_in.push_back(vi());
+        g.push_back(-1);
+        f.push_back(-1);
+        return t_counter++;
+    }
+
+    int add_rule(string t1, vector<string> terms) {
         if (terminals.count(t1) == 0) add_terminal(t1);
-        int non_terms = 0;
-        vector<pii> rule_amounts;
-        for (auto s: result) {
-            if (s[0] == '"') { non_terms++; continue; }
+        int non_term_count = 0;
+        bool special_encountered = false;
+        vector<pii> term_amounts;
+        for (auto s: terms) {
+            if (s[0] == '"') { non_term_count++; if (s == identifier) special_encountered = true; continue; }
             if (terminals.count(s) == 0) { add_terminal(s); }
             bool found = false;
-            for (int j=0; j<rule_amounts.size(); j++) {
-                if (rule_amounts[j].X == terminals[s]) {
+            for (int j=0; j<term_amounts.size(); j++) {
+                if (term_amounts[j].X == terminals[s]) {
                     found = true;
-                    rule_amounts[j].Y ++;
+                    term_amounts[j].Y ++;
                     break;
                 }
             }
             if (!found) {
-                rule_amounts.push_back(pii(terminals[s], 1));
+                term_amounts.push_back(pii(terminals[s], 1));
                 used_in[terminals[s]].push_back(r_counter);
             }
         }
-        generated_by[terminals[t1]].push_back(r_counter);
-        rules[r_counter++] = rule(pii(terminals[t1], non_terms), rule_amounts);
-        consider(r_counter-1);
-    }
-
-    void consider(int rno) {
-        int term = rules[rno].X.X;
-        if (best_rule[term] == rno) {
-            // If we incremented the length of rno. It may no longer be the minimum.
-            // As such we need to check for the minimum again.
-            best_rule[term] = -1;
-            for (auto rn: generated_by[term]) {
-                consider(rn);
-            }
-            return;
-        }
-        if (
-            (best_rule[term] == -1) ||
-            (
-                (rules[best_rule[term]].X.Y > rules[rno].X.Y) ||
-                (rules[best_rule[term]].X.Y == rules[rno].X.Y && rules[best_rule[term]].Y.size() > rules[rno].Y.size())
-            ) ||
-            (best_rule[term] == rno)
-        ) {
-            best_rule[term] = rno;
-            if (rules[rno].Y.size() == 0) {
-                expanding.push(term);
-            }
-        }
+        rule1s[r_counter] = rule1(pii(r_counter, non_term_count), term_amounts);
+        rule2s[r_counter] = rule2(pair<pii, pii>(pii(r_counter, non_term_count), pii(special_encountered ? 0 : -1, 0)), term_amounts);
+        generates.push_back(terminals[t1]);
+        return r_counter++;
     }
 
     void solve() {
-        while (expanding.size()) {
-            int term = expanding.front();
-            expanding.pop();
-            if (g[term] != -1) continue;
-            rule applied_rule = rules[best_rule[term]];
-            g[term] = applied_rule.X.Y;
-            cerr << "Expanding " << term << " with g value " << g[term] << endl;
-            for (auto rno: used_in[term]) {
-                if (g[rules[rno].X.X] == -1) {
-                    cerr << "  Used in rule " << rno << endl;
-                    for (int i=0; i<rules[rno].Y.size(); i++) {
-                        if (rules[rno].Y[i].X == term) {
-                            rules[rno].X.Y += g[term] * rules[rno].Y[i].Y;
-                            rules[rno].Y.erase(rules[rno].Y.begin() + i);
-                            consider(rno);
-                            break;
-                        }
+        auto cmp = [&](rule1 l, rule1 r) {
+            // Is l more than r?
+            if (g[generates[l.rno1]] != -1) return true;
+            if (g[generates[r.rno1]] != -1) return false;
+            if (generates[l.rno1] != generates[r.rno1]) {
+                if (l.Y.size() > r.Y.size()) return true;
+                else if (l.Y.size() < r.Y.size()) return false;
+            }
+            if (l.rno1 == r.rno1) {
+                if (l.Y.size() > r.Y.size()) return true;
+                else if (l.Y.size() < r.Y.size()) return false;
+            }
+            if (l.Y.size() > r.Y.size()) return true;
+            if (l.Y.size() < r.Y.size()) return false;
+            // Equal smallest distance, same generated.
+            return (l.smallest_dist1 > r.smallest_dist1);
+        };
+        priority_queue<rule1, vector<rule1>, decltype(cmp)> pq(cmp);
+        for (int i=0; i<r_counter; i++) {
+            pq.push(rule1s[i]);
+        }
+        while (!pq.empty()) {
+            rule1 r = pq.top();
+            pq.pop();
+            int term = generates[r.rno1];
+            // dbg_rule1(r);
+            if (g[term] != -1) { continue; }  // This isn't the best rule.
+            if (r.Y.size() != 0) { break; }  // No further rules are ready. Break
+            // Expand this rule.
+            g[term] = r.smallest_dist1;
+            // cerr << "Got a rule for term #" << term << "! Set the g value to " << g[term] << endl;
+            // Update every rule which uses this term.
+            for (auto a: used_in[term]) {
+                for (int b=0; b<rule1s[a].Y.size(); b++) {
+                    if (rule1s[a].Y[b].X == term) {
+                        rule1s[a].smallest_dist1 += g[term] *  rule1s[a].Y[b].Y;
+                        rule1s[a].Y.erase(rule1s[a].Y.begin() + b);
+                        pq.push(rule1s[a]);
+                        break;
                     }
                 }
             }
         }
     }
+
+    void solve2() {
+        for (int i=0; i<n_rules; i++) {
+            for (auto pa: rule2s[i].Y) {
+                if (g[pa.X] == -1) {
+                    rule2s[i].minimum_dist2 = -1;
+                    break;
+                }
+                rule2s[i].minimum_dist2 += pa.Y * g[pa.X];
+            }
+        }
+        auto cmp = [&](rule2 l, rule2 r) {
+            // Is l worse than r?
+            if (l.minimum_dist2 == -1) return true;
+            if (r.minimum_dist2 == -1) return false;
+            if (l.minimum_change2 == -1) return true;
+            if (r.minimum_change2 == -1) return false;
+            if (generates[l.rno2] != generates[r.rno2]) {
+                if (l.Y.size() > r.Y.size()) return true;
+                else if (l.Y.size() < r.Y.size()) return false;
+            }
+            if (l.rno2 == r.rno2) {
+                if (l.Y.size() > r.Y.size()) return true;
+                else if (l.Y.size() < r.Y.size()) return false;
+            }
+            if (l.minimum_dist2 + l.minimum_change2 < r.minimum_dist2 + r.minimum_change2) return false;
+            if (l.minimum_dist2 + l.minimum_change2 > r.minimum_dist2 + r.minimum_change2) return true;
+            // Equal smallest distance, same generated.
+            return (l.Y.size() > r.Y.size());
+        };
+        priority_queue<rule2, vector<rule2>, decltype(cmp)> pq(cmp);
+        for (int i=0; i<r_counter; i++) {
+            pq.push(rule2s[i]);
+        }
+        while (!pq.empty()) {
+            rule2 r = pq.top();
+            pq.pop();
+            int term = generates[r.rno2];
+            // dbg_rule2(r);
+            if (f[term] != -1) { continue; }; // This isn't the best rule.
+            if (r.minimum_dist2 == -1) break; // No further rules are usable. Break
+            if (r.minimum_change2 == -1) break;  // No further rules are ready. Break
+            // Expand this rule
+            f[term] = r.minimum_dist2 + r.minimum_change2;
+            // cerr << "Got a rule for term #" << term << "! Set the f value to " << f[term] << endl;
+            // Update every rule which uses this term.
+            for (auto a: used_in[term]) {
+                for (int b=0; b<rule2s[a].Y.size(); b++) {
+                    if (rule2s[a].Y[b].X == term) {
+                        if (rule2s[a].minimum_change2 == -1 || rule2s[a].minimum_change2 > f[term] - g[term]) rule2s[a].minimum_change2 = f[term] - g[term];
+                        rule2s[a].Y.erase(rule2s[a].Y.begin() + b);
+                        pq.push(rule2s[a]);
+                        break;
+                    }
+                }
+            }
+        }
+    }
+
 };
 
 int main() {
 
     while (1) {
-
         int num_rules;
         cin >> num_rules >> ws;
         if (num_rules == 0) break;
@@ -145,10 +221,11 @@ int main() {
             store.add_rule(t1, parts);
         }
 
-        // Compute g values.
+        // Compute g, then f values.
         store.solve();
+        store.solve2();
 
-        cout << store.g[store.terminals[clause]] << endl;
+        cout << store.f[store.terminals[clause]] << endl;
     }
 
     return 0;
