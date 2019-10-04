@@ -46,10 +46,10 @@ int main()
 
     sort(players, players+n);
     reverse(players, players+n);
-    
+
     cout << players[0].name;
     for (int i = 1; i < n; i++)
         if (equal(players[0], players[i]))
             cout << ' ' << players[i].name;
-    cout << " won with " << players[0].wins << " wins and " << (players[0].dif > 0 ? "+" : (players[0].dif == 0 ? "" : "-")) << players[0].dif << " points difference." << endl;
+    cout << " won with " << players[0].wins << " wins and " << (players[0].dif > 0 ? "+" : (players[0].dif == 0 ? "" : "")) << players[0].dif << " points difference." << endl;
 }

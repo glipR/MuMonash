@@ -4,7 +4,7 @@ class Player:
         self.idd = 0
         self.dif = 0
         self.name = ""
-    
+
     def __str__(self):
         return '{} - {} - {} - {}'.format(self.name, self.wins, self.dif, self.idd)
 
@@ -41,6 +41,6 @@ for i in range(1, n):
     else:
         break
 
-print(" won with {} wins and {}{} points difference.".format(players[0].wins, '+' if players[0].dif > 0 else ('-' if players[0].dif < 0 else ''), players[0].dif))
+print(" won with {} wins and {}{} points difference.".format(players[0].wins, '+' if players[0].dif > 0 else ('' if players[0].dif < 0 else ''), players[0].dif))
 
 

@@ -32,5 +32,5 @@ for x in range(n):
     elif wins[x] == bwins and total[x] == diff:
         winners.append(names[x])
 
-diff_string = f'+{diff}' if diff > 0 else (f'-{diff}' if diff < 0 else diff)
+diff_string = f'+{diff}' if diff > 0 else (f'{diff}' if diff < 0 else diff)
 print(' '.join(winners), 'won with', bwins, 'wins and', diff_string, 'points difference.')
