@@ -1,10 +1,14 @@
 ulimit -s 10000
 
+function compile {
+    g++ $1 -g -std=c++14 -Wall -Wextra -Wconversion -Wshadow -Wfatal-errors -fsanitize=address,undefined -o $2
+}
+
 # For C/CPP
 function runc {
     clear;clear
     F=`ls -t *.c* | head -n1`
-    g++ $F -g -std=c++14 -Wall -Wextra -Wconversion -Wshadow -Wfatal-errors -fsanitize=address,undefined -o sol || return
+    compile $F sol || return
 
     for i in *.in; do
         echo ---$F $i
@@ -51,11 +55,11 @@ function runtests {
     clear;clear
     if [[ $2 == *.c* ]];
     then
-        g++ $2 -g -std=c++14 -Wall -Wextra -Wconversion -Wshadow -Wfatal-errors -fsanitize=address,undefined -o correct
+        compile $2 correct
     fi
     if [[ $3 == *.c* ]];
     then
-        g++ $3 -g -std=c++14 -Wall -Wextra -Wconversion -Wshadow -Wfatal-errors -fsanitize=address,undefined -o test
+        compile $3 test
     fi
     ITERATIONS=${4:-50}
     completed=1
