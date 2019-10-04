@@ -26,6 +26,8 @@ typedef pair<pair<pii, pii>, vector<pii> > rule2;  // Used for f values
 #define minimum_change2 X.Y.X
 #define terms_considered2 X.Y.Y
 
+#define ISINF -2
+#define INF 1000000000
 
 struct RuleStorage {
 
@@ -119,13 +121,22 @@ struct RuleStorage {
             if (g[term] != -1) { continue; }  // This isn't the best rule.
             if (r.Y.size() != 0) { break; }  // No further rules are ready. Break
             // Expand this rule.
-            g[term] = r.smallest_dist1;
+            if (r.smallest_dist1 > INF) {
+                g[term] = ISINF;
+            }
+            else {
+                g[term] = r.smallest_dist1;
+            }
             // cerr << "Got a rule for term #" << term << "! Set the g value to " << g[term] << endl;
             // Update every rule which uses this term.
             for (auto a: used_in[term]) {
                 for (int b=0; b<rule1s[a].Y.size(); b++) {
                     if (rule1s[a].Y[b].X == term) {
-                        rule1s[a].smallest_dist1 += g[term] *  rule1s[a].Y[b].Y;
+                        if (g[term] == ISINF) {
+                            rule1s[a].smallest_dist1 = INF + 1;
+                        } else {
+                            rule1s[a].smallest_dist1 += g[term] *  rule1s[a].Y[b].Y;
+                        }
                         rule1s[a].Y.erase(rule1s[a].Y.begin() + b);
                         pq.push(rule1s[a]);
                         break;
@@ -138,7 +149,7 @@ struct RuleStorage {
     void solve2() {
         for (int i=0; i<n_rules; i++) {
             for (auto pa: rule2s[i].Y) {
-                if (g[pa.X] == -1) {
+                if (g[pa.X] == -1 || g[pa.X] == -2) {
                     rule2s[i].minimum_dist2 = -1;
                     break;
                 }
@@ -177,13 +188,13 @@ struct RuleStorage {
             if (r.minimum_dist2 == -1) break; // No further rules are usable. Break
             if (r.minimum_change2 == -1) break;  // No further rules are ready. Break
             // Expand this rule
-            f[term] = r.minimum_dist2 + r.minimum_change2;
+            f[term] = (r.minimum_dist2 + r.minimum_change2 > INF) ? ISINF : r.minimum_dist2 + r.minimum_change2;
             // cerr << "Got a rule for term #" << term << "! Set the f value to " << f[term] << endl;
             // Update every rule which uses this term.
             for (auto a: used_in[term]) {
                 for (int b=0; b<rule2s[a].Y.size(); b++) {
                     if (rule2s[a].Y[b].X == term) {
-                        if (rule2s[a].minimum_change2 == -1 || rule2s[a].minimum_change2 > f[term] - g[term]) rule2s[a].minimum_change2 = f[term] - g[term];
+                        if (rule2s[a].minimum_change2 == -1 || rule2s[a].minimum_change2 > ((f[term] == ISINF) ? INF : f[term] - g[term])) rule2s[a].minimum_change2 = ((f[term] == ISINF) ? INF : f[term] - g[term]);
                         rule2s[a].Y.erase(rule2s[a].Y.begin() + b);
                         pq.push(rule2s[a]);
                         break;
@@ -225,7 +236,12 @@ int main() {
         store.solve();
         store.solve2();
 
-        cout << store.f[store.terminals[clause]] << endl;
+        if (store.f[store.terminals[clause]] == -2) {
+            cout << -1 << endl;
+        }
+        else {
+            cout << store.f[store.terminals[clause]] << endl;
+        }
     }
 
     return 0;
