@@ -4,46 +4,44 @@ function compile {
     g++ $1 -g -std=c++14 -Wall -Wextra -Wconversion -Wshadow -Wfatal-errors -fsanitize=address,undefined -o $2
 }
 
-# For C/CPP
-function runc {
-    clear;clear
-    F=`ls -t *.c* | head -n1`
-    compile $F sol || return
-
-    for i in *.in; do
-        echo ---$F $i
-        { time (./sol <$i >o 2>error) >/dev/null; } 2>timing
-        cat timing | grep real | awk '{print $2}'
-        cat error
-        # Not required
-        rm timing
-        rm error
-        # Required
-        diff -y o ${i%in}[ao]?? >t || cat t || cat o
-        # Not required
-        rm o
-        rm t
-    done
+function runcompiled {
+    if [[ $1 == *.py ]]; then
+        { time (python3 $1 <$2 >o 2>error) >/dev/null; } 2>timing
+    else
+        { time (./$1 <$2 >o 2>error) >/dev/null; } 2>timing
+    fi
+    cat timing | grep real | awk '{print $2}'
+    cat error
+    # Not required
+    rm timing
+    rm error
+    # Required
+    diff -y o ${2%in}[ao]?? >t || cat t || cat o
+    # Not required
+    rm o
+    rm t
 }
 
-# For Python3
-function runp {
+function run {
     clear;clear
-    F=`ls -t *.py | head -n1`
-    for i in *.in; do
-        echo ---$F $i
-        { time (python3 $F <$i >o 2>error) >/dev/null; } 2>timing
-        cat timing | grep real | awk '{print $2}'
-        cat error
-        # Not required
-        rm timing
-        rm error
-        # Required
-        diff -y o ${i%in}[ao]?? >t || cat t || cat o
-        # Not required
-        rm o
-        rm t
-    done
+    first_file=`ls -t *.{cpp,py} | head -n1`
+    F=${1-$first_file}
+    if [[ $F == *.c* ]]
+    then
+        compile $F sol
+        runner='sol'
+    else
+        runner=$F
+    fi
+    if [ -n "$2" ]; then
+        echo ---$F $2
+        runcompiled $runner $2
+    else
+        for i in *.in; do
+            echo ---$F $i
+            runcompiled $runner $i
+        done
+    fi
 }
 
 function runtests {
