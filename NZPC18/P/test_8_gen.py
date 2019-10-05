@@ -22,7 +22,7 @@ for i in range(MAX_RULES - 1):
     rules.append((last, [r for _ in range(10)]))
     last = r
 
-rules.append((last, ['"a"']*10))
+rules.append((last, ['"target"']*10))
 
 print(len(rules))
 print("{} {}".format(start, target))
