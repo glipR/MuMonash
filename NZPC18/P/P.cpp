@@ -5,13 +5,15 @@
 #include <cstdio>
 #include <queue>
 #include <set>
+#include <algorithm>
 
 #define pb(a) push_back(a)
 #define mp(a,b) make_pair(a,b)
 
 using namespace std;
 
-typedef pair<int, int> pii;
+typedef pair<long long, int> pii;
+typedef long long ll;
 
 const int MAX_NUM = 1e9 + 7;
 
@@ -20,12 +22,12 @@ struct Rule {
     string id;
 
     int terminals_cnt;
-    int literals;
+    ll literals;
     int unmatched_ids;
     bool has_target;
 
-    int backup_literals;
-    int backup_unmatched_ids;
+    ll backup_literals;
+    ll backup_unmatched_ids;
 
     void restore_backup()
     {
@@ -62,7 +64,6 @@ struct Rule {
         for (int j = 0; j < terminals_cnt; j++)
         {
             res = "";
-            if (line[i] == '.') break;
             while (line[i] != ' ')
                 res += line[i++];
             i++;
@@ -84,10 +85,10 @@ struct Rule {
 };
 
 vector<Rule> rules;
-map<string, int> g;
-map<string, int> f;
+map<string, ll> g;
+map<string, ll> f;
 map<string, set<int> > mapping;
-multiset <pii> g_goods, f_goods; // pii.first = # literals, pii.second = index of the rule
+set <pii> g_goods, f_goods; // pii.first = # literals, pii.second = index of the rule
 
 void global_resets()
 {
@@ -103,15 +104,17 @@ void compute_gs()
 {
     while (!g_goods.empty())
     {
-        pii f = *g_goods.begin();
-        if (g.find(rules[f.second].id) != g.end())
-        {
-            g_goods.erase(g_goods.begin());
+        pii front = *g_goods.begin();
+        g_goods.erase(g_goods.begin());
+        if (g.find(rules[front.second].id) != g.end())
             continue;
-        }
-        string id = rules[f.second].id;
-        int value = f.first;
+
+        string id = rules[front.second].id;
+        ll value = front.first;
+        if (value >= MAX_NUM) continue;
+
         g[id] = value;
+        
         for (auto it = mapping[id].begin(); it != mapping[id].end(); it++)
         {
             int ruleIndex = *it;
@@ -134,29 +137,31 @@ void compute_fs()
     while (!f_goods.empty())
     {
         pii front = *f_goods.begin();
+        f_goods.erase(f_goods.begin());
         if (f.find(rules[front.second].id) != f.end())
-        {
-            f_goods.erase(f_goods.begin());
             continue;
-        }
+
         string id = rules[front.second].id;
-        int value = front.first;
+        ll value = front.first;
+        if (value >= MAX_NUM) continue;
+
         f[id] = value;
+
         for (auto it = mapping[id].begin(); it != mapping[id].end(); it++)
         {
             int ruleIndex = *it;
-            int value = rules[ruleIndex].literals;
+            ll inside_value = rules[ruleIndex].literals;
             for (int i = 0; i < rules[ruleIndex].ids.size(); i++)
-                if (g.find(rules[ruleIndex].ids[i]) == g.end())
+                if (g.find(rules[ruleIndex].ids[i]) == g.end() || g[rules[ruleIndex].ids[i]] >= MAX_NUM)
                 {
-                    value = -1;
+                    inside_value = -1;
                     break;
                 }
-                else value += g[rules[ruleIndex].ids[i]];
-            if (value == -1)
+                else inside_value += g[rules[ruleIndex].ids[i]];
+            if (inside_value == -1)
                 continue;
-            value -= g[id]; value += f[id];
-            f_goods.insert(mp(value, ruleIndex));
+            inside_value -= g[id]; inside_value += f[id];
+            f_goods.insert(mp(inside_value, ruleIndex));
         }
     }
 }
@@ -189,7 +194,7 @@ int main()
         for (int i = 0; i < rules.size(); i++)
         {
             if (!rules[i].has_target) continue;
-            int value = rules[i].literals;
+            ll value = rules[i].literals;
             for (int j = 0; j < rules[i].ids.size(); j++)
             {
                 string id = rules[i].ids[j];
