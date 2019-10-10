@@ -15,7 +15,7 @@ using namespace std;
 typedef pair<long long, int> pii;
 typedef long long ll;
 
-const int MAX_NUM = 1e9 + 7;
+const int MAX_NUM = 1e9;
 
 struct Rule {
     vector<string> ids;
@@ -111,7 +111,7 @@ void compute_gs()
 
         string id = rules[front.second].id;
         ll value = front.first;
-        if (value >= MAX_NUM) continue;
+        if (value > MAX_NUM) continue;
 
         g[id] = value;
         
@@ -143,7 +143,7 @@ void compute_fs()
 
         string id = rules[front.second].id;
         ll value = front.first;
-        if (value >= MAX_NUM) continue;
+        if (value > MAX_NUM) continue;
 
         f[id] = value;
 
@@ -152,7 +152,7 @@ void compute_fs()
             int ruleIndex = *it;
             ll inside_value = rules[ruleIndex].literals;
             for (int i = 0; i < rules[ruleIndex].ids.size(); i++)
-                if (g.find(rules[ruleIndex].ids[i]) == g.end() || g[rules[ruleIndex].ids[i]] >= MAX_NUM)
+                if (g.find(rules[ruleIndex].ids[i]) == g.end() || g[rules[ruleIndex].ids[i]] > MAX_NUM)
                 {
                     inside_value = -1;
                     break;
