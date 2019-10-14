@@ -12,8 +12,9 @@ using namespace std;
 
 typedef pair<int, int> pii;
 typedef vector<int> vi;
-typedef pair<pii, vector<pii> > rule1;             // Used for g values
-typedef pair<pair<pii, pii>, vector<pii> > rule2;  // Used for f values
+typedef long long ll;
+typedef pair<pair<int, ll>, vector<pii> > rule1;             // Used for g values
+typedef pair<pair<pair<int, ll>, pii>, vector<pii> > rule2;  // Used for f values
 
 #define X first
 #define Y second
@@ -35,8 +36,8 @@ struct RuleStorage {
     int t_counter;
     int r_counter;
     map<string, int> terminals;
-    vi g;
-    vi f;
+    vector<ll> g;
+    vector<ll> f;
     vector<vi> used_in;
     string identifier;
     vector<rule1> rule1s;
@@ -236,7 +237,9 @@ int main() {
         store.solve();
         store.solve2();
 
-        if (store.f[store.terminals[clause]] == -2) {
+        cerr << store.f[store.terminals[clause]] << endl;
+
+        if (store.f[store.terminals[clause]] == -2 || store.f[store.terminals[clause]] > INF) {
             cout << -1 << endl;
         }
         else {
