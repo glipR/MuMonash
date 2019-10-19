@@ -21,8 +21,9 @@ def foo(b):
 n = int(input())
 for _ in range(n):
     # multiply by two to account for prepending X
-    res = foo(int(input()))
-    if res > 0:
-        print(res*2)
+    b = int(input())
+    res = foo(b)
+    if b > 0:
+        print((res*2) % (1000000007))
     else:
         print(res)
