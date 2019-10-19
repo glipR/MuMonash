@@ -6,10 +6,10 @@ using namespace std;
 
 typedef long long ll;
 
-ll result[100001];
+ll result[100011];
 ll n, a, b;
 
-bool check(ll len)
+void check(ll len)
 {
     ll sum = len * a;
     for (int i = len - 1; i >= 0; i--)
@@ -23,8 +23,9 @@ bool check(ll len)
 int main()
 {
     cin >> n >> a >> b;
-    memset(result, sizeof(result), a);
-    ll l = 0, r = 100001, len = -1;
+    for (int i = 0; i < 100001; i++)
+        result[i] = a;
+    ll len = -1;
     for (int i = 1; i <= 100000; i++)
     {
         ll lower = i * a;
