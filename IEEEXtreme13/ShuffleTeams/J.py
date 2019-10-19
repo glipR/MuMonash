@@ -27,35 +27,34 @@ for _ in range(t):
             start += 1
             start %= len(string)
             all_points[-1].append(current)
-        best_points[i] = [a for a, e in enumerate(all_points[-1]) if e == best]
+        best_points[i] = [a for a, e in enumerate(all_points[-1]) if e >= best - 1]
 
-    i = 0
-    key = 'A'
-    best = len(string)
-    for point in range(len(string)):
-        current = counts[i] - all_points[i][point]
-        best2 = len(string)
-        for j, key2 in enumerate('ABCD'):
-            if j == i: continue
-            point2 = (point + counts[i]) % len(string)
-            current2 = counts[j] - all_points[j][point2]
-            best3 = len(string)
-            for k, key3 in enumerate('ABCD'):
-                if k == j or k == i: continue
-                point3 = (point2 + counts[j]) % len(string)
-                current3 = counts[k] - all_points[k][point3]
-                best4 = len(string)
-                for l, key4 in enumerate('ABCD'):
-                    if l == k or l == j or l == i: continue
-                    point4 = (point3 + counts[k]) % len(string)
-                    current4 = counts[l] - all_points[l][point4]
-                    best4 = min(best4, current4)
-                current3 = current3 + best4
-                best3 = min(best3, current3)
-            current2 = current2 + best3
-            best2 = min(best2, current2)
-        current = current + best2
-        best = min(best, current)
+    for i, key in enumerate('ABCD'):
+        best = len(string)
+        for point in best_points[i]:
+            current = counts[i] - all_points[i][point]
+            best2 = len(string)
+            for j, key2 in enumerate('ABCD'):
+                if j == i: continue
+                point2 = (point + counts[i]) % len(string)
+                current2 = counts[j] - all_points[j][point2]
+                best3 = len(string)
+                for k, key3 in enumerate('ABCD'):
+                    if k == j or k == i: continue
+                    point3 = (point2 + counts[j]) % len(string)
+                    current3 = counts[k] - all_points[k][point3]
+                    best4 = len(string)
+                    for l, key4 in enumerate('ABCD'):
+                        if l == k or l == j or l == i: continue
+                        point4 = (point3 + counts[k]) % len(string)
+                        current4 = counts[l] - all_points[l][point4]
+                        best4 = min(best4, current4)
+                    current3 = current3 + best4
+                    best3 = min(best3, current3)
+                current2 = current2 + best3
+                best2 = min(best2, current2)
+            current = current + best2
+            best = min(best, current)
     print(best)
 
 
