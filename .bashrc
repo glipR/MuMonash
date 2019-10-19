@@ -115,3 +115,52 @@ function runtests {
         rm test.out
     fi
 }
+
+function checkresult {
+    # Arguments
+        # Test generator
+        # Test script
+        # Postprocessing
+        # Num tests
+    clear;clear
+    if [[ $2 == *.c* ]];
+    then
+        compile $2 sol
+    fi
+    ITERATIONS=${4:-50}
+    completed=1
+    for (( i=1; i<=ITERATIONS; i++ )) do
+        echo "Test #$i"
+        python3 $1 > test.in
+        if [[ $2 == *.c* ]];
+        then
+            ./sol < test.in > test.out
+        fi
+        if [[ $2 == *.py ]];
+        then
+            python3 $2 < test.in > test.out
+        fi
+        error=$?
+        if [[ $error -ne 0 ]]
+        then
+            echo "Error on test case with test script"
+            completed=0
+            break
+        fi
+        python3 $3 test.in test.out > test.result
+        str=GOOD
+        if [[ $(< test.result) != "$str" ]]; then
+            echo "Post processing failed."
+            completed=0
+            break
+        fi
+    done
+    rm sol
+    if [[ $completed -eq 1 ]]
+    then
+        echo "Completed $ITERATIONS tests successfuly."
+        rm test.result
+        rm test.in
+        rm test.out
+    fi
+}
