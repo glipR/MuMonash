@@ -19,16 +19,20 @@ int main() {
         cout << "NO" << endl;
         return 0;
     }
-
-    vector<int> soln(valid, a);
-    int remaining = n - valid*a;
-    for (int i = valid-1; i>=0; --i) {
-        int change = min(remaining, (int)(b-a));
+    
+    vector<ll> soln(valid, a);
+    ll remaining = n - valid*a;
+    for (ll i = valid-1; i>=0; --i) {
+        ll change = min(remaining, (ll)(b-a));
         soln[i] += change;
         remaining -= change;
     }
+
     cout << "YES" << endl;
-    for (int i =0; i<valid; ++i) {
-        cout << soln[i] << ' ';
+    cout << soln[0];
+    for (int i =1; i<valid; ++i) {
+        cout << ' ' << soln[i];
     }
+    cout << endl;
+
 }
