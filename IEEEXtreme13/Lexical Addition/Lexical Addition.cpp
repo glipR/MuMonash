@@ -15,8 +15,8 @@ void check(ll len)
     for (int i = len - 1; i >= 0; i--)
     {
         if (sum >= n) break;
-        result[i] = min(b, n-sum);
-        sum += min(b, n-sum);
+        result[i] += min(b-a, n-sum);
+        sum += min(b-a, n-sum);
     }
 }
 
