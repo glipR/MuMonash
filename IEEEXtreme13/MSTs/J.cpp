@@ -12,22 +12,18 @@ typedef vector<vi> vvi;
 #define X first
 #define Y second
 
+#define MAXN 100000
+
 template<typename T = int> struct LCA {
     const int LOGN = 20;
-    int n; vi par, lvl; vvi anc; vector<T> len; vector<vector<pair<int, T> > > adj;
+    int n; int par[MAXN], lvl[MAXN]; int anc[MAXN][20]; T len[MAXN];
     void dfs(int u, int p, int l, T d) {
         par[u] = p, lvl[u] = l, len[u] = d;
-        for (auto v: adj[u]) if (v.X != p) dfs(v.X, u, l+1, d+v.Y);
     }
-    LCA(int n) : n(n), par(n), lvl(n), len(n), adj(n) {}
-    void add_edge(int u, int v, T w = 1) {
-        adj[u].emplace_back(v, w); adj[v].emplace_back(u, w);
-    }
+    LCA(int n) : n(n) {}
     void build(int root = 0) {
-        dfs(root, -1, 0, 0), anc.assign(n, vi(LOGN, -1));
-        for (int i=0; i<n; i++) anc[i][0] = par[i];
-        for (int k=1; k<LOGN; k++) for (int i=0; i<n; i++)
-            if (anc[i][k-1] != -1) anc[i][k] = anc[anc[i][k-1]][k-1];
+        dfs(root, -1, 0, 0);
+        for (int i=0; i<n; i++) for (int k=0; k<LOGN; k++) anc[i][k] = -1;
     }
     int query(int u, int v) {
         if (lvl[u] > lvl[v]) swap(u, v);
@@ -41,13 +37,10 @@ template<typename T = int> struct LCA {
         return par[u];
     }
     int add_node(int parent, T w) {
-        par.push_back(parent);
-        lvl.push_back(lvl[parent]+1);
-        anc.push_back(vi(LOGN, -1));
-        len.push_back(len[parent] + w);
-        adj.push_back(vector<pair<T, int> >());
-        add_edge(n, parent, w);
-        anc[n][0] = par[n];
+        par[n] = parent;
+        lvl[n] = lvl[parent]+1;
+        anc[n][0] = parent;
+        len[n] = len[parent] + w;
         for (int k=1; k<LOGN; k++)
             if (anc[n][k-1] != -1) anc[n][k] = anc[anc[n][k-1]][k-1];
         return n++;
