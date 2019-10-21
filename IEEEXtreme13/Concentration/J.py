@@ -14,5 +14,6 @@ for x in range(n):
 for x in range(n):
     for y in range(len(positions[x])//2):
         print(min(positions[x][2*y], positions[x][2*y+1]), max(positions[x][2*y], positions[x][2*y+1]))
+        input()
 
 print(-1)
