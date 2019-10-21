@@ -1,5 +1,6 @@
+// This RTEs on sample for some reason but works locally.
+
 #include <iostream>
-#include <cmath>
 
 #define MAX 100001
 
@@ -63,7 +64,7 @@ int ccountSubsets(int arr[], int n, int gcd[], int m, int k)
 
     int amount=0;
     for (int i=0; i<m; i++)
-        if ((subsets[gcd[i]] && k != 1) || (minK[gcd[i]] == 1) && k == 1)
+        if ((subsets[gcd[i]] && k != 1) || (minK[gcd[i]] == 1 && k == 1))
             amount++;
 
     return amount;
@@ -74,7 +75,7 @@ int main() {
 
     cin >> n >> k;
 
-    int arr[n];
+    int arr[MAX];
     int gcd[MAX];
     for (int i=0; i<n; i++) {
         cin >> arr[i];
