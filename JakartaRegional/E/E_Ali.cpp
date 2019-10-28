@@ -13,7 +13,7 @@ struct Pair {
     int index;
     ll amount;
     Pair(){}
-    Pair(int a, int b):index(a), amount(b) {}
+    Pair(int a, ll b):index(a), amount(b) {}
 };
 
 int main()
@@ -29,7 +29,7 @@ int main()
     ll increases[MAXN];
     memset(increases, 0, sizeof(increases));
     ans.pb(l);
-    changes.pb(Pair(0, 2000000000));
+    changes.pb(Pair(0, 2000000000000000));
     
     ll increased_so_far = 0;
 
@@ -38,6 +38,7 @@ int main()
         if (x[i] > x[i-1])
         {
             ans.pb(ans[i-1]+1);
+            changes.pb(Pair(i, k-1));
         }
         else if (x[i] == x[i-1])
             ans.pb(ans[i-1]);
