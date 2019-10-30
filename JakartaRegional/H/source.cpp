@@ -6,15 +6,14 @@
 
 using namespace std;
 
+typedef long long ll;
+
 struct Rect {
-    int l; int w;
+    ll l; ll w;
     Rect () {}
-    Rect (int a, int b, bool q = true)
+    Rect (ll a, ll b)
     {
-        if (q)
-            if (a > b) swap(a, b);
-        if (!q) 
-            if (a < b) swap(a, b);
+        if (a < b) swap(a, b);
         l = a;
         w = b;
     }
@@ -25,35 +24,50 @@ struct Rect {
     }
 };
 
+
 int main()
 {
     int n;
     cin >> n;
-    vector<Rect> x, y;
+    vector<Rect> x;
     for (int i = 0; i < n; i++)
     {
-        int l, w;
+        ll l, w;
         cin >> l >> w;
         x.pb(Rect(l, w));
-        y.pb(Rect(l, w, false));
     }
 
     sort(x.begin(), x.end());
-    sort(y.begin(), y.end());
 
-    double ans = -1;
+    ll sameLand = -1;
 
-    int longest1 = 0;
-    int longest2 = 0;
+    ll differentLand = -1;
+
+    ll longest = 0;
 
     for (int i = x.size() - 1; i >= 0; i--)
     {
-        ans = max(ans, 1.0*(1.0*(x[i].l * x[i].w) / 2));
-        ans = max(ans, 1.0*(x[i].l * min(longest1, x[i].w)));
-        ans = max(ans, 1.0*(y[i].l * min(longest2, y[i].w)));
-        longest1 = max(longest1, x[i].w);
-        longest2 = max(longest2, y[i].w);
+        if (x[i].l * x[i].w > sameLand)
+            sameLand = x[i].l * x[i].w;
+        differentLand = max(differentLand, (x[i].l * min(longest, x[i].w)));
+        longest = max(longest, x[i].w);
     }
-
-    printf("%.1f\n", ans);
+    if (sameLand > 2*differentLand)
+    {
+        if (sameLand % 2)
+        {
+            sameLand++;
+            sameLand /= 2;
+            sameLand--;
+            cout << sameLand << ".5" << endl;
+        }
+        else
+        {
+            cout << sameLand / 2 << ".0" << endl;
+        }
+    }
+    else
+    {
+        cout << differentLand << ".0" << endl;
+    }
 }
