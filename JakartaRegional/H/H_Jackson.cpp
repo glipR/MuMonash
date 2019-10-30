@@ -55,9 +55,9 @@ int main() {
         }
     }
 
-    double max_area = 0;
+    ll max_area = 0;
     for (int i=0; i<n; i++) {
-        max_area = max(max_area, x[i].a * x[i].b /(double) 2);
+        max_area = max(max_area, x[i].a * x[i].b);
     }
 
     // Sweepline begin
@@ -66,7 +66,7 @@ int main() {
         if (rvals[i].size() > 1) {
             max_area = max(
                 max_area,
-                (double)(lvals[i] * (min(rvals[i][rvals[i].size() - 1], rvals[i][rvals[i].size() - 2])))
+                (ll)(2 * lvals[i] * (min(rvals[i][rvals[i].size() - 1], rvals[i][rvals[i].size() - 2])))
             );
         }
         // We can also move back some steps, until we find an rval greater than ours, and use the minimum of the maximum rval here and the maximum rval there.
@@ -74,14 +74,14 @@ int main() {
         while (j >= 0) {
             max_area = max(
                 max_area,
-                (double)(lvals[j] * min(rvals[i][rvals[i].size() - 1], rvals[j][rvals[j].size() - 1]))
+                (ll)(2 * lvals[j] * min(rvals[i][rvals[i].size() - 1], rvals[j][rvals[j].size() - 1]))
             );
             if (rvals[i][rvals[i].size() - 1] < rvals[j][rvals[j].size() - 1]) break;
             j--;
         }
     }
 
-    printf("%.1f\n", max_area);
+    cout << max_area / 2 << (max_area % 2 ? ".5" : ".0") << endl;
 
     return 0;
 }
