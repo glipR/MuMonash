@@ -61,6 +61,7 @@ template<typename T, typename U> struct seg_tree_lazy {
     }
 
     void upd(int i, int j, U update) {
+        // cerr << "Updating to " << update.value << " over [" << i << ", " << j << "]" << endl;
         i += S, j += S;
         propagate(i), propagate(j);
 
@@ -70,18 +71,35 @@ template<typename T, typename U> struct seg_tree_lazy {
         }
 
         rebuild(i), rebuild(j);
+        // debug();
     }
 
     T query(int i, int j){
+        // cerr << "Querying [" << i << ", " << j << "]" << endl;
         i += S, j += S;
         propagate(i), propagate(j);
+        // debug();
 
         T res_left = zero, res_right = zero;
         for(; i <= j; i /= 2, j /= 2){
             if((i&1) == 1) res_left = res_left + value[i++];
             if((j&1) == 0) res_right = value[j--] + res_right;
         }
+        // cerr << "Got " << (res_left + res_right).minim << endl;
         return res_left + res_right;
+    }
+
+    void debug() {
+        cerr << "Values in tree:" << endl;
+        for (int i=0; i<2*S; i++) {
+            cerr << value[i].minim << " ";
+        }
+        cerr << endl;
+        cerr << "Updates in tree:" << endl;
+        for (int i=0; i<2*S; i++) {
+            cerr << prop[i].value << " ";
+        }
+        cerr << endl;
     }
 };
 
@@ -120,8 +138,8 @@ int main() {
     for (int i=1; i<n; i++) {
         if (employees[i] > employees[0]) above_randall++;
     }
-    cerr << "Starting with " << above_randall << endl;
-    seg_tree_lazy<node, update> st(m, {0}, {0});
+    // cerr << "Starting with " << above_randall << endl;
+    seg_tree_lazy<node, update> st(m, {100000}, {0});
     vector<node> leaves(m, {0});
     st.set_leaves(leaves);
 
@@ -130,22 +148,22 @@ int main() {
     for (int i=0; i<m; i++) {
         ll num_changes;
         cin >> num_changes;
-        cerr << st.query(i, i).minim << endl;
+        // cerr << st.query(i, i).minim << endl;
         st.upd(i, i, { (n - num_changes) - above_randall - 1 });
-        cerr << i << " should be " << ((n - num_changes) - above_randall - 1) << endl;
-        cerr << st.query(i, i).minim << endl;
+        // cerr << i << " should be " << ((n - num_changes) - above_randall - 1) << endl;
+        // cerr << st.query(i, i).minim << endl;
         for (int j=0; j<num_changes; j++) {
             ll change;
             cin >> change;
             updates[i].push_back(change);
             if (change > employees[0]) above_randall++;
         }
-        cerr << "Year " << i+1 << " with " << above_randall << " and " << num_changes << " replaced." << endl;
+        // cerr << "Year " << i+1 << " with " << above_randall << " and " << num_changes << " replaced." << endl;
     }
 
-    for (int i=0; i<m; i++) {
+    /*for (int i=0; i<m; i++) {
         cerr << st.query(i, i).minim << endl;
-    }
+    }*/
 
     for (int a=0; a<q; a++) {
         int i, j;
@@ -153,11 +171,11 @@ int main() {
         cin >> i >> j >> change;
         if (updates[i-1][j-1] < employees[0]) {
             if (change > employees[0]) {
-                st.upd(i-1, m-1, { -1 });
+                st.upd(i, m-1, { -1 });
             }
         } else {
             if (change < employees[0]) {
-                st.upd(i-1, m-1, { 1 });
+                st.upd(i, m-1, { 1 });
             }
         }
         updates[i-1][j-1] = change;
