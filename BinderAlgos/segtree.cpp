@@ -35,94 +35,184 @@ template <typename T> struct SparseTable {
     }
 };
 
-// Dynamic RMQ (Segment Tree)
-// O(n) build, O(log(n)) query/update.
-template <typename T> struct SegmentTree {
-    int n; vector<pair<T, int> > st; const pair <T, int> I = {numeric_limits<T>::max(),-1};
-    SegmentTree(const vector<T>& A) : n(A.size()), st(2*n, I) {
-        for (int i=0; i<n;i++) st[n+i] = {A[i], i};
-        for (int i=n-1;i;--i) st[i]=min(st[2*i], st[2*i+1]);
+// Dynamic RQ, with lazy propogation (Ranged updates.)
+// Updates and querys are INCLUSIVE ON BOTH SIDES [L, R].
+template<typename T, typename U> struct SegmentTree {
+    int S, H;
+
+    T z;
+    vector<T> v; // Actual values (May not be up to date)
+
+    U noop; // No Operation constant
+    vector<bool> d; // Dirty array (What needs updating)
+    vector<U> p; // Lazy propogated updates.
+
+    SegmentTree<T, U>(int _S, T _z = T(), U _noop = U()) {
+        z = _z, noop = _noop;
+        for (S = 1, H = 1; S < _S; ) S *= 2, H++;
+        v.resize(2*S, z);
+        d.resize(2*S, false);
+        p.resize(2*S, noop);
     }
-    void update(int i, int val) {
-        for (st[i+=n]={val, i}; i>1; i/=2) st[i/2]=min(st[i], st[i^1]);
+
+    void set_leaves(vector<T> &l) {
+        copy(l.begin(), l.end(), v.begin() + S);
+        for (int i = S - 1; i > 0; i--)
+            v[i] = v[2 * i] + v[2 * i + 1];
     }
-    pair<T, int> query(int l, int r) {
-        pair<T, int> res=I;
-        for (l += n, r+= n; l<= r; l/= 2, r/= 2) {
-            // cerr << "S: " << l << ' ' << r << endl;
-            if (l&1) {
-                // cerr << "l" << endl;
-                res = min(res, st[l++]);
+
+    void apply(int i, U &up) {
+        v[i] = up(v[i]);
+        if(i < S) {
+            p[i] = p[i] + up;
+            d[i] = true;
+        }
+    }
+
+    void rebuild(int i) {
+        for (int l = i/2; l; l /= 2) {
+            T c = v[2*l] + v[2*l+1];
+            v[l] = p[l](c);
+        }
+    }
+
+    void prop(int i) {
+        for (int h = H; h > 0; h--) {
+            int l = i >> h;
+
+            if (d[l]) {
+                apply(2*l, p[l]);
+                apply(2*l+1, p[l]);
+
+                p[l] = noop;
+                d[l] = false;
             }
-            if (~r&1) {   // THIS IS A TILDE, NOT A MINUS :^(. You could instead do !(r&1), right?
-                // cerr << "r" << endl;
-                res = min(res, st[r--]);
-            }
         }
-        return res;
+    }
+
+    void upd(int i, int j, U update) {
+        i += S, j += S;
+        prop(i), prop(j);
+
+        for (int l = i, r = j; l <= r; l /= 2, r /= 2) {
+            if((l&1) == 1) apply(l++, update);
+            if((r&1) == 0) apply(r--, update);
+        }
+
+        rebuild(i), rebuild(j);
+    }
+
+    T query(int i, int j){
+        i += S, j += S;
+        prop(i), prop(j);
+
+        T res_left = z, res_right = z;
+        for(; i <= j; i /= 2, j /= 2){
+            if((i&1) == 1) res_left = res_left + v[i++];
+            if((j&1) == 0) res_right = v[j--] + res_right;
+        }
+        return res_left + res_right;
     }
 };
 
-// Dynamic RMQ (Segment Tree) with range updates.
-// More modular, and allows for Custom SegTree "Parts" to be added in.
-// As above, O(N) build, and O(log(n)) query.
-// Here, U is that "part" mentioned above.
-template<typename T, typename U> struct SegmentTree2 {
-    T I, t[4]; int N, h; vector<T> A; // I is the identity value.
-    SegmentTree2(const vector<T>& data, T I=T()): I(I), N(data.size()),
-    h(sizeof(int)*8-__builtin_clz(N)), A(2*N, I) {
-        copy(data.begin(), data.end(), A.begin()+N);
-        for (int i=N-1; i;i--) op(i);
-    }
-    void op(int i) { A[i].op(A[2*i], A[2*i+1]); }
-    void prop(int i) { A[2*i].us(A[i].U); A[2*i+1].us(A[i].U); A[i].NU(); }
-    void push(int i) {for (int j=h;j;j--) prop(i>>j); }
-    void update(int l, int r, U v) { // Acts on [l, r)
-        push(l+=N); push((r+=N)-1); bool cl=0,cr=0;
-        for (;l<r;l/=2,r/=2) {
-            if (cl) op(l-1); if (cr) op(r);
-            if (l&1) A[l++].us(v), cl=1;
-            if (r&1) A[--r].us(v), cr=1;
-        }
-        if (l==1 && cr) op(1);
-        else for (l--;r>0;l/=2,r/=2) {
-            if (cl && l) op(l);
-            if (cr && (!cl || (l!=r && r!=1))) op(r);
-        }
-    }
-    T query(int l, int r) { // Acts on [l, r)
-        push(l+=N); push((r+=N)-1);
-        t[0]=t[2]=I; int i=0, j=2;
-        for(;l<r;l/=2,r/=2) {
-            if (l&1) t[i^1].op(t[i],A[l++]), i^=1;
-            if (r&1) t[j^1].op(A[--r],t[j]), j^=1;
-        }
-        t[i^1].op(t[i],t[j]);
-        return t[i^1];
+/* Example structures for minimum with increment and global update. */
+struct minNode {
+    ll minim;
+
+    // How are minimums combined?
+    minNode operator+(const minNode &n) {
+        return { min(n.minim, minim) };
     }
 };
 
-struct RangeGCD {  // Example Input to above, to get GCD over range and update value over range.
-    // THIS IS BUGGED OR THE IMPLEMENTATION ABOVE IS BUGGED
-    int a = INT_MIN, U = INT_MAX;
-    void op(RangeGCD& b, RangeGCD& c) { a=gcd(b.a, c.a); }  // Merge two segments.
-    void us(int v) { if (v!=INT_MAX) a=U=v; }  // Apply a lazy update (Possibly worse than actuality?)
-    void NU() { U = INT_MAX; }  // Node requires no update?
+struct minUpdate {
+    bool type; // true => increment; false => set.
+    ll value;
+
+    // How do we apply an operation?
+    minNode operator()(const minNode &n) {
+        return { type ? n.minim + value : value };
+    }
+
+    minUpdate operator+(const minUpdate &u) {
+        if (type) {
+            // Increment
+            return { u.type, u.value + value};
+        }
+        // Set
+        return { type, value };
+    }
 };
 
-struct RangeSum {
-    int a = 0, U = INT_MAX;
-    void op(RangeSum& b, RangeSum& c) { a = b.a + c.a; }
-    void us(int v) { if (v!=INT_MAX) a=U=v; }
-    void NU() { U=INT_MAX; }
+const minNode minZero { INT_MAX };
+const minUpdate minNoUp { true, 0 }; // Increment by 0 by default.
+
+/* Example structures for sum with increment and global update. */
+struct sumNode {
+    ll value;
+    ll width; // How many leaves does this node span?
+
+    // How are sums combined?
+    sumNode operator+(const sumNode &n) {
+        return { value + n.value, width + n.width };
+    }
 };
 
-struct RangeMin {
-    int a = INT_MAX, U = INT_MIN;
-    void op(RangeMin& b, RangeMin& c) { a=min(b.a, c.a); }
-    void us(int v) { if (v!=INT_MIN) a=U=v; }
-    void NU() { U=INT_MIN; }
+struct sumUpdate {
+    bool type; // true => increment; false => set.
+    ll value;
+
+    // How do we apply an operation?
+    sumNode operator()(const sumNode &n) {
+        return { type ? n.value + value * n.width : value * n.width, n.width };
+    }
+
+    sumUpdate operator+(const sumUpdate &u) {
+        if (type) {
+            // Increment
+            return { u.type, u.value + value};
+        }
+        // Set
+        return { type, value };
+    }
 };
+
+const sumNode sumZero { 0, 1 }; // Width 1.
+const sumUpdate sumNoUp { true, 0 }; // Increment by 0 by default.
+
+/* Example structures for gcd with multiply and global update. */
+struct gcdNode {
+    ll value;
+
+    // How are gcds combined?
+    gcdNode operator+(const gcdNode &n) {
+        if (n.value == -1) return { value };
+        if (value == -1) return { n.value };
+        return { gcd(n.value, value) };
+    }
+};
+
+struct gcdUpdate {
+    bool type; // true => multiply; false => set.
+    ll value;
+
+    // How do we apply an operation?
+    gcdNode operator()(const gcdNode &n) {
+        return { type ? n.value * value : value };
+    }
+
+    gcdUpdate operator+(const gcdUpdate &u) {
+        if (type) {
+            // Multiply
+            return { u.type, u.value * value};
+        }
+        // Set the gcd
+        return { type, value };
+    }
+};
+
+const gcdNode gcdZero { -1 }; // Width 1.
+const gcdUpdate gcdNoUp { true, 1 }; // Multiply by 1 by default.
 
 int main() {
 
@@ -137,27 +227,74 @@ int main() {
     list.push_back(2);
 
     SparseTable<int> s(list);
-    SegmentTree<int> d(list);
+    SegmentTree<minNode, minUpdate> st(list.size(), minZero, minNoUp);
+    vector<minNode> nodeList;
+    for (int i=0; i<list.size(); i++) {
+        nodeList.push_back({ list[i] });
+    }
+    st.set_leaves(nodeList);
 
     cout << "Static vs Dynamic Min" << endl;
-
+    // 0, 1, 2, 3, 4, 5, 6, 7
+    // 3, 5, 2, 4, 1, 5, 3, 2
     cout << s.query(3, 7).first << " " << s.query(3, 7).second << endl;
-    cout << d.query(3, 7).first << " " << d.query(3, 7).second << endl;
+    cout << st.query(3, 7).minim << endl;
+    // 1 4, 1
     cout << s.query(0, 2).first << " " << s.query(0, 2).second << endl;
-    cout << d.query(0, 2).first << " " << d.query(0, 2).second << endl;
-    d.update(3, 1);
-    cout << s.query(2, 3).first << " " << s.query(2, 3).second << endl;
-    cout << d.query(2, 3).first << " " << d.query(2, 3).second << endl;
+    cout << st.query(0, 2).minim << endl;
+    // 2 2, 2
+    st.upd(2, 4, { true, 1 }); // Increment [2, 4] by 2.
+    cout << s.query(2, 6).first << " " << s.query(2, 6).second << endl;
+    cout << st.query(2, 6).minim << endl;
+    // 1 4, 2
+    st.upd(4, 4, { false, 10 }); // Set [4, 4] to 10
+    cout << st.query(4, 4).minim << endl;
+    // 10
+
+    cout << "Sum Updates" << endl;
+    SegmentTree<sumNode, sumUpdate> st2(list.size(), sumZero, sumNoUp);
+    vector<sumNode> sumList;
+    for (int i=0; i<list.size(); i++) {
+        sumList.push_back({ list[i], 1 });
+    }
+    st2.set_leaves(sumList);
+
+    // 0, 1, 2, 3, 4, 5, 6, 7
+    // 3, 5, 2, 4, 1, 5, 3, 2
+    for (int i=0; i<8; i++) {
+        cout << st2.query(i, i).value << " ";
+    }
+    cout << endl;
+    cout << st2.query(0, 7).value << " " << st2.query(2, 5).value << endl;
+    // 25 12
+    st2.upd(1, 5, { false, 1 }); // Set all of [1, 5] to 1.
+    cout << st2.query(1, 5).value << " " << st2.query(0, 7).value << endl;
+    // 5 13
+    st2.upd(4, 7, { true, 2 }); // Increment [4, 7] by 2.
+    cout << st2.query(2, 5).value << " " << st2.query(0, 7).value << endl;
+    // 8 21
 
     cout << "GCD Range Updates" << endl;
+    SegmentTree<gcdNode, gcdUpdate> st3(list.size(), gcdZero, gcdNoUp);
+    vector<gcdNode> gcdList;
+    for (int i=0; i<list.size(); i++) {
+        gcdList.push_back({ list[i] });
+    }
+    st3.set_leaves(gcdList);
 
-    SegmentTree2<RangeMin, int> st(vector<RangeMin>(10));
-    st.update(0, 4, 8);
-    st.update(4, 5, 6);
-    st.update(5, 10, 16);
-    cout << st.query(4, 10).a << endl;
-    cout << st.query(0, 6).a << endl;
-    cout << st.query(7, 10).a << endl;
-
+    // 0, 1, 2, 3, 4, 5, 6, 7
+    // 3, 5, 2, 4, 1, 5, 3, 2
+    cout << st3.query(2, 2).value << " " << st3.query(4, 4).value << endl;
+    // 2 1
+    st3.upd(4, 6, { true, 2 }); // Multiply [4, 6] by 2.
+    st3.upd(2, 3, { true, 10 }); // Multiply [2, 3] by 10.
+    cout << st3.query(3, 7).value << " " << st3.query(2, 3).value << endl;
+    // 2 20
+    st3.upd(0, 0, { false, 6 });
+    st3.upd(7, 7, { false, 15 });
+    st3.upd(1, 6, { true, 4 });
+    st3.upd(1, 6, { true, 3 });
+    cout << st3.query(0, 7).value << " " << st3.query(0, 6).value << endl;
+    // 3 6
     return 0;
 }
