@@ -29,14 +29,18 @@ bool mark[3*MAXN];
 int n;
 vector<Edge> edges;
 
+vector<pair<int, int> > findCList[MAXN];
+
 int dfsMat(int node)
 {
     mark[node] = 1;
     int res = 1;
-    for (int i = 0; i < n; i++)
+    for (int i = 0; i < findCList[node].size(); i++)
     {
-        if (mat[node][i].first == 1 && !edges[mat[node][i].second].removed && !mark[i])
-            res += dfsMat(i);
+        int new_node = findCList[node][i].first;
+        int edge_index = findCList[node][i].second;
+        if (!edges[edge_index].removed && !mark[new_node])
+            res += dfsMat(new_node);
     }
     return res;
 }
@@ -146,8 +150,8 @@ int main()
         int x; cin >> x;
         int m; cin >> m;
         edges.pb(Edge(i, x-1));
-        mat[i][x-1] = mp(1, i);
-        mat[x-1][i] = mp(1, i);
+        findCList[i].pb(mp(x-1, i));
+        findCList[x-1].pb(mp(i, i));
         for (int j = 0; j < m; j++)
         {
             cin >> x;
@@ -156,6 +160,8 @@ int main()
     }
 
     int inCycles = 0;
+
+    //cerr << "Start finding cycle " << endl;
 
     for (int i = 0; i < n; i++)
     {
@@ -168,6 +174,8 @@ int main()
         }
         edges[i].removed = 0;
     }
+
+    //cerr << "End finding cycle" << endl;
 
     set<int> allWorkers;
     map<int, int> internalMap;
@@ -191,6 +199,8 @@ int main()
     int nodeIndex = 3;
 
     map<int, int> reverse_map;
+
+    //cerr << "Here1" << endl;
 
     for (auto it = allWorkers.begin(); it != allWorkers.end(); it++, nodeIndex++)
     {
@@ -238,9 +248,15 @@ int main()
     flowList[2][flowList[2].size()-1].rev = flowList[1].size()-1;
     flowList[1][flowList[1].size()-1].rev = flowList[2].size()-1;
 
+//    cerr << "Here2 " << endl;
+
     //cout << "before flow:\n"; printFlowGraph(nodeIndex);
 
+    //cerr << "Here" << endl;
+
     int flow = sendFlow(0, 1);
+
+    //cerr << "End of flow" << endl;
 
     //cout << "flow: " << flow << endl; // 000000000000000000000000
     //cout << "in cycles: " << inCycles << endl; // -----------------
