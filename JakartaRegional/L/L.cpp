@@ -15,7 +15,7 @@ typedef vector<vi> vvi;
 typedef long long ll;
 
 struct BipartiteMatchingCap {
-    int L, R, p; vi m, used, d, capacity; vvi adj; queue<int> q;
+    int L, R, p; vi m, used, d, capacity; vvi adj, adjL; queue<int> q;
     bool bfs() {
         for (int v=0; v<R; v++) if (used[v] < capacity[v]) d[v] = p, q.push(v);
         while (!q.empty()) {
@@ -30,15 +30,48 @@ struct BipartiteMatchingCap {
         for (int u : adj[v]) if (d[m[u]] == d[v] + 1 && dfs(m[u])) return m[u] = v, 1;
         d[v] = d[R]; return 0;
     }
-    BipartiteMatchingCap(int L, int R): L(L), R(R), d(R+1), adj(R), capacity(R, 1) {}
+    BipartiteMatchingCap(int L, int R): L(L), R(R), d(R+1), adj(R), adjL(L), capacity(R, 1) {}
     void add_edge(int u, int v) {
         adj[v].push_back(u);
+        adjL[u].push_back(v);
     }
     pair<int, vi> match() {
         int res = 0; m.assign(L, R), used.assign(R+1, 0);
         for (p=0; bfs(); p = d[R]+1) for (int v=0; v<R; v++)
             if ((used[v] < capacity[v]) && dfs(v)) used[v]++, res++;
         replace(m.begin(), m.end(), R, -1); return {res, m};
+    }
+    void dfs_able(int v, vi &swaps, vector<bool> &marked) {
+        // cerr << "DFS from road " << v << endl;
+        marked[v] = true;
+        if (m[v] != -1)
+        for (auto u: adj[m[v]]) {
+            if (m[u] != m[v]) if (swaps[u] == -1 && !marked[u]) {
+                swaps[u] = v;
+                dfs_able(u, swaps, marked);
+            }
+        }
+    }
+    vi swap(int source, vector<bool> cycles) {
+        // cerr << source << endl;
+        vi swaps(L, -1);
+        vector<bool> marked(R, false);
+        int good = -1;
+        for (int i=0; i<L; i++) if (cycles[i]) {
+            // cerr << "Starting from cycle road " << i << endl;
+            dfs_able(i, swaps, marked);
+        }
+        if (swaps[source] == -1) {
+            return vi();
+        }
+        vi path;
+        int current = source;
+        while (!cycles[current]) {
+            path.push_back(current);
+            current = swaps[current];
+        }
+        path.push_back(current);
+        return path;
     }
 };
 
@@ -194,19 +227,20 @@ int main() {
         /*for (int i=0; i<n; i++) {
             cerr << match.Y[i] << " ";
         }
-        cerr << endl;*/
+        cerr << endl;
+        cerr << "n-1" << endl;*/
         if (!cycle_prefs[wrong]) {
+            // cerr << "bad" << endl;
             // See if there is a cyclic assignment we can remove.
-            vector<bool> acceptable(mat_index.size(), false);
-            for (ll m: mat[wrong]) { acceptable[mat_index[m]] = true; }
-            for (int i=0; i<n; i++) {
-                if (cycle_prefs[i]) {
-                    if (acceptable[match.Y[i]]) {
-                        swap(match.Y[i], match.Y[wrong]);
-                        break;
-                    }
+            vector<bool> cyclic(n);
+            for (int i=0; i<n; i++) cyclic[i] = cycle_prefs[i];
+            vi result = bm.swap(wrong, cyclic);
+            if (result.size() == 0) bad = true;
+            else {
+                for (int i=0; i<result.size()-1; i++) {
+                    match.Y[result[i]] = match.Y[result[i+1]];
                 }
-                bad = true;
+                match.Y[result[result.size()-1]] = -1;
             }
         }
     }
