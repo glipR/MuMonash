@@ -14,6 +14,8 @@ typedef long long ll;
 const int MAXN = 1e5 + 10;
 const ll MOD = 1e9 + 7;
 
+const int debug = 0;
+
 ll powerr(ll a, ll b)
 {
     if (b == 1)
@@ -188,7 +190,7 @@ ll compute_f1(int node)
         int left = list[node][i];
         if (par[node] == left) continue;
         res = sum(res, mul(
-            dp[left][0], sub(partial[list[node].size()-1], partial[i])
+            dp[left][0], mul(sub(partial[list[node].size()-1], partial[i]), modular_inverse(dp[left][2]))
         ));
     }
 
@@ -268,7 +270,7 @@ int main()
         dp[node][2] = compute_f2(node);
     }
 
-    while (0)
+    while (debug)
     {
         int a, b;
         cin >> a >> b;
