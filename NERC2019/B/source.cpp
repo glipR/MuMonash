@@ -10,6 +10,7 @@ int main()
     ll n, k;
     cin >> n >> k;
     ll team[8010];
+    for (int i = 0; i < k; i++) team[i] = 0;
     for (int i = 0; i < n; i++)
     {
         ll x; cin >> x;
