@@ -27,6 +27,7 @@ def score(truth, guess):
                 if (not used[y]) and truth[y] == guess[x]:
                     used[y] = True
                     white += 1
+                    break
     return black, white
 
 num_possible = len(options)
