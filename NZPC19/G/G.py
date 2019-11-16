@@ -13,7 +13,7 @@ for x in range(n):
         elif res[index] == '+':
             res = res[:index-2] + [res[index-2] + res[index-1]] + res[index+1:]
             index -= 2
-        elif res[index] == '–':
+        elif res[index] == '-':
             res = res[:index-2] + [res[index-2] - res[index-1]] + res[index+1:]
             index -= 2
         else:
