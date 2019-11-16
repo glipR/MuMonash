@@ -40,10 +40,6 @@ for x in range(n):
             if score(options[y], code) != sol:
                 num_possible -= 1
                 possible[y] = False
-    if (num_possible == 3):
-        for y in range(len(options)):
-            if possible[y]:
-                print(options[y])
     if (num_possible == 1): unique = x
 
 for y in range(len(options)):
