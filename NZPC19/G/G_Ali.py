@@ -3,7 +3,7 @@ q = int(input())
 mapping = {
     '+': lambda x, y: x + y,
     '-': lambda x, y: x - y,
-    '/': lambda x, y: x // y,
+    '/': lambda x, y: (abs(x) // abs(y)) * (-1 if x < 0 else 1) * (-1 if y < 0 else 1),
     '*': lambda x, y: x * y
 }
 
