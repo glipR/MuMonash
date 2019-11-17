@@ -6,7 +6,7 @@ using namespace std;
 typedef long long ll;
 
 struct Key {
-    int value;
+    ll value;
     vector<int> ciphers;
 };
 
@@ -38,7 +38,7 @@ int main() {
             for (auto c: key.ciphers) {
                 // Find the portion of the original text that is already described by the key.
                 ll val = ((key.value >> i) ^ (ciphers[c] >> i)) << i;
-                ll val2 = val + (1 << i) - 1;
+                ll val2 = val + ((ll)1 << i) - 1;
                 // cerr << "Cipher " << c << " has current values " << val << " to " << val2 << endl;
                 // Original text can range from [val, val2].
                 if (val > B || val2 < A) {
@@ -54,14 +54,14 @@ int main() {
             }
             if (c2) continue; // Key invalid no matter what.
             if (c3.size() == 0) { // Key valid no matter what.
-                total_keys += (1 << i);
+                total_keys += ((ll)1 << i);
                 continue;
             }
             // Boundary ciphers cause problems.
             Key k1;
             Key k2;
             k1.value = key.value;
-            k2.value = key.value + (1 << (i-1));
+            k2.value = key.value + ((ll)1 << (i-1));
             k1.ciphers = c3;
             k2.ciphers = c3;
             new_keys.push_back(k1);
