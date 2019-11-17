@@ -1,4 +1,4 @@
-attempt_score = [10, 7, 4, 3]
+attempt_score = [10, 7, 4]
 
 weights = list(map(int, input().split()))
 num_students = int(input())
@@ -13,9 +13,10 @@ for x in range(num_students):
 while True:
     x, y, z = input().split()
     if x == "0": break
+    index = ord(y) - ord('A')
     if z == "P":
-        students[x]["score"] += weights[ord(y) - ord('A')] * attempt_score[min(students[x]["attempts"][ord(y) - ord('A')], 3)]
-    students[x]["attempts"][ord(y) - ord('A')] += 1
+        students[x]["score"] += weights[index] * attempt_score[min(students[x]["attempts"][index], 2)]
+    students[x]["attempts"][index] += 1
 
 pass_mark = sum(weights) * attempt_score[0] / 2
 
