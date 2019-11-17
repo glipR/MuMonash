@@ -16,9 +16,9 @@ while q > 0:
         if exp not in ['+', '-', '/', '*']:
             stack.append(int(exp))
         else:
-            right = stack.pop()
-            left = stack.pop()
-            stack.append(mapping[exp](left, right))
+            right = stack[-1]
+            del stack[-1]
+            stack[-1] = mapping[exp](stack[-1], right)
 
     if len(stack) > 1:
         while True:
