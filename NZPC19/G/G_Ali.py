@@ -18,7 +18,7 @@ while q > 0:
         else:
             right = stack[-1]
             del stack[-1]
-            stack[-1] = mapping[exp](stack[-1], right)
+            stack[-1] = int(mapping[exp](stack[-1], right))
 
     if len(stack) > 1:
         while True:
