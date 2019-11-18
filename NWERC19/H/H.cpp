@@ -11,6 +11,11 @@ using namespace std;
 typedef long long ll;
 typedef long double ld;
 
+struct Point {
+    ll val;
+    int index;
+};
+
 int main() {
 
     int n, k;
@@ -22,28 +27,30 @@ int main() {
     for (int query=0; query<k; query++) {
         ld g;
         cin >> g;
-        vector<ll> translated_points(n+1);
+        vector<Point> translated_points(n+1);
         vector<ll> values;
-        vector<ll> inter_values;
+        vector<Point> inter_values;
         vector<int> leftmost;
         vector<int> rightmost;
         for (int i=0; i<n+1; i++) {
-            translated_points[i] = points[i] - 10 * i * g;
+            translated_points[i].val = points[i] - 10 * i * g;
+            translated_points[i].index = i;
         }
         inter_values = translated_points;
-        sort(inter_values.begin(), inter_values.end());
-        values.push_back(inter_values[0]);
+        sort(inter_values.begin(), inter_values.end(), [](Point a, Point b) {
+            return (a.val < b.val) || ((a.val == b.val) && a.index < b.index);
+        });
+        values.push_back(inter_values[0].val);
+        leftmost.push_back(inter_values[0].index);
+        rightmost.push_back(inter_values[0].index);
         for (int i=1; i<inter_values.size(); i++) {
-            if (inter_values[i] != values[values.size() - 1]) {
-                values.push_back(inter_values[i]);
+            if (inter_values[i].val != values[values.size() - 1]) {
+                values.push_back(inter_values[i].val);
+                leftmost.push_back(inter_values[i].index);
+                rightmost.push_back(inter_values[i].index);
+            } else {
+                rightmost[rightmost.size() - 1] = inter_values[i].index;
             }
-        }
-        leftmost = vector<int>(values.size(), n+2);
-        rightmost = vector<int>(values.size(), -1);
-        for (int i=0; i<n+1; i++) {
-            auto index = lower_bound(values.begin(), values.end(), translated_points[i]) - values.begin();
-            rightmost[index] = i;
-            leftmost[index] = min(i, leftmost[index]);
         }
         // We now have leftmost and rightmost, as well as all possible values.
         ll best = -1;
@@ -74,9 +81,9 @@ int main() {
                 // Extending right:
                 // x = (translated[option.X] - translated[option.Y]) / (translated[option.Y+1] - translated[option.Y]).
                 if (option.X > 0)
-                    actual_best = max(actual_best, best + ((ld)(translated_points[option.Y] - translated_points[option.X])) / ((ld)(translated_points[option.X-1] - translated_points[option.X])));
+                    actual_best = max(actual_best, best + ((ld)(translated_points[option.Y].val - translated_points[option.X].val)) / ((ld)(translated_points[option.X-1].val - translated_points[option.X].val)));
                 if (option.Y < n)
-                    actual_best = max(actual_best, best + ((ld)(translated_points[option.X] - translated_points[option.Y])) / ((ld)(translated_points[option.Y+1] - translated_points[option.Y])));
+                    actual_best = max(actual_best, best + ((ld)(translated_points[option.X].val - translated_points[option.Y].val)) / ((ld)(translated_points[option.Y+1].val - translated_points[option.Y].val)));
             }
             cout << setprecision(9) << fixed << actual_best << endl;
         }
