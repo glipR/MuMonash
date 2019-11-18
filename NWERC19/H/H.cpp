@@ -56,36 +56,57 @@ int main() {
         ll best = -1;
         vector<pair<ll, ll> > options;
         int rm = -1;
-        for (int i=values.size()-1; i>=0; i--) {
-            rm = max(rightmost[i], rm);
-            // cerr << ">=" << values[i] << " is first seen at " << leftmost[i] << " and last seen at " << rm << endl;
-            if (rm - leftmost[i] > best) {
-                best = rm - leftmost[i];
-                options.clear();
-                options.push_back({ leftmost[i], rm });
-            } else if (rm - leftmost[i] == best) {
-                options.push_back({ leftmost[i], rm });
+        if (g >= 0)
+            for (int i=values.size()-1; i>=0; i--) {
+                // Look at values decreasing.
+                rm = max(rightmost[i], rm);
+                // cerr << ">=" << values[i] << " is first seen at " << leftmost[i] << " and last seen at " << rm << endl;
+                if (rm - leftmost[i] > best) {
+                    best = rm - leftmost[i];
+                    options.clear();
+                    options.push_back({ leftmost[i], rm });
+                } else if (rm - leftmost[i] == best) {
+                    options.push_back({ leftmost[i], rm });
+                }
             }
-        }
+        else
+            for (int i=0; i<values.size(); i++) {
+                // Look at values increasing.
+                rm = max(rightmost[i], rm);
+                // cerr << ">=" << values[i] << " is first seen at " << leftmost[i] << " and last seen at " << rm << endl;
+                if (rm - leftmost[i] > best) {
+                    best = rm - leftmost[i];
+                    options.clear();
+                    options.push_back({ leftmost[i], rm });
+                } else if (rm - leftmost[i] == best) {
+                    options.push_back({ leftmost[i], rm });
+                }
+            }
 
-        if (best == 0) {
+        if (best <= 0) {
             cout << "impossible" << endl;
         }
         else {
             ld actual_best = best;
             for (auto option: options) {
+                // cerr << option.X << " " << option.Y << endl;
                 // Try extending either way.
                 // Extending left:
                 // translated[option.X] + (translated[option.X-1] - translated[option.X]) * y = translated[option.Y]
                 // y = (translated[option.Y] - translated[option.X]) / (translated[option.X-1] - translated[option.X]).
                 // Extending right:
                 // x = (translated[option.X] - translated[option.Y]) / (translated[option.Y+1] - translated[option.Y]).
-                if (option.X > 0)
+                if (option.X > 0) {
                     actual_best = max(actual_best, best + ((ld)(translated_points[option.Y].val - translated_points[option.X].val)) / ((ld)(translated_points[option.X-1].val - translated_points[option.X].val)));
-                if (option.Y < n)
+                    // cerr << "x" << best + ((ld)(translated_points[option.Y].val - translated_points[option.X].val)) / ((ld)(translated_points[option.X-1].val - translated_points[option.X].val)) << endl;
+                }
+                if (option.Y < n) {
                     actual_best = max(actual_best, best + ((ld)(translated_points[option.X].val - translated_points[option.Y].val)) / ((ld)(translated_points[option.Y+1].val - translated_points[option.Y].val)));
+                    // cerr << "y" << best + ((ld)(translated_points[option.X].val - translated_points[option.Y].val)) / ((ld)(translated_points[option.Y+1].val - translated_points[option.Y].val)) << endl;
+                }
             }
-            cout << setprecision(9) << fixed << actual_best << endl;
+
+            cout << setprecision(12) << fixed << actual_best << endl;
         }
 
     }
