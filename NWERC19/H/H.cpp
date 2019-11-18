@@ -24,27 +24,31 @@ int main() {
         cin >> g;
         vector<ll> translated_points(n+1);
         vector<ll> values;
-        vector<ll> leftmost;
-        vector<ll> rightmost;
+        vector<ll> inter_values;
+        vector<int> leftmost;
+        vector<int> rightmost;
         for (int i=0; i<n+1; i++) {
             translated_points[i] = points[i] - 10 * i * g;
-            // cerr << translated_points[i] << endl;
-            if (binary_search(values.begin(), values.end(), translated_points[i])) {
-                auto index = lower_bound(values.begin(), values.end(), translated_points[i]);
-                rightmost[index - values.begin()] = i;
-            } else {
-                auto lm = lower_bound(values.begin(), values.end(), translated_points[i]);
-                // cerr << "Inserting " << translated_points[i] << " at " << lm - values.begin() << endl;
-                int index = lm - values.begin();
-                values.insert(values.begin() + index, translated_points[i]);
-                leftmost.insert(leftmost.begin() + index, i);
-                rightmost.insert(rightmost.begin() + index, i);
+        }
+        inter_values = translated_points;
+        sort(inter_values.begin(), inter_values.end());
+        values.push_back(inter_values[0]);
+        for (int i=1; i<inter_values.size(); i++) {
+            if (inter_values[i] != values[values.size() - 1]) {
+                values.push_back(inter_values[i]);
             }
+        }
+        leftmost = vector<int>(values.size(), n+2);
+        rightmost = vector<int>(values.size(), -1);
+        for (int i=0; i<n+1; i++) {
+            auto index = lower_bound(values.begin(), values.end(), translated_points[i]) - values.begin();
+            rightmost[index] = i;
+            leftmost[index] = min(i, leftmost[index]);
         }
         // We now have leftmost and rightmost, as well as all possible values.
         ll best = -1;
         vector<pair<ll, ll> > options;
-        ll rm = -1;
+        int rm = -1;
         for (int i=values.size()-1; i>=0; i--) {
             rm = max(rightmost[i], rm);
             // cerr << ">=" << values[i] << " is first seen at " << leftmost[i] << " and last seen at " << rm << endl;
