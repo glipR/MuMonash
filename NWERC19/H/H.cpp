@@ -33,7 +33,7 @@ int main() {
         vector<int> leftmost;
         vector<int> rightmost;
         for (int i=0; i<n+1; i++) {
-            translated_points[i].val = points[i] - 10 * i * g;
+            translated_points[i].val = (points[i] - 10 * i * g) * 1e5;
             translated_points[i].index = i;
         }
         inter_values = translated_points;
@@ -56,32 +56,18 @@ int main() {
         ll best = -1;
         vector<pair<ll, ll> > options;
         int rm = -1;
-        if (g >= 0)
-            for (int i=values.size()-1; i>=0; i--) {
-                // Look at values decreasing.
-                rm = max(rightmost[i], rm);
-                // cerr << ">=" << values[i] << " is first seen at " << leftmost[i] << " and last seen at " << rm << endl;
-                if (rm - leftmost[i] > best) {
-                    best = rm - leftmost[i];
-                    options.clear();
-                    options.push_back({ leftmost[i], rm });
-                } else if (rm - leftmost[i] == best) {
-                    options.push_back({ leftmost[i], rm });
-                }
+        for (int i=values.size()-1; i>=0; i--) {
+            // Look at values decreasing.
+            rm = max(rightmost[i], rm);
+            // cerr << ">=" << values[i] << " is first seen at " << leftmost[i] << " and last seen at " << rm << endl;
+            if (rm - leftmost[i] > best) {
+                best = rm - leftmost[i];
+                options.clear();
+                options.push_back({ leftmost[i], rm });
+            } else if (rm - leftmost[i] == best) {
+                options.push_back({ leftmost[i], rm });
             }
-        else
-            for (int i=0; i<values.size(); i++) {
-                // Look at values increasing.
-                rm = max(rightmost[i], rm);
-                // cerr << ">=" << values[i] << " is first seen at " << leftmost[i] << " and last seen at " << rm << endl;
-                if (rm - leftmost[i] > best) {
-                    best = rm - leftmost[i];
-                    options.clear();
-                    options.push_back({ leftmost[i], rm });
-                } else if (rm - leftmost[i] == best) {
-                    options.push_back({ leftmost[i], rm });
-                }
-            }
+        }
 
         if (best <= 0) {
             cout << "impossible" << endl;
