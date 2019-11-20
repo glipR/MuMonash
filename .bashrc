@@ -44,6 +44,8 @@ function run {
     fi
 }
 
+## OPTIONAL
+
 function runtests {
     # Arguments
         # Test generator
