@@ -162,8 +162,8 @@ struct Arrow {
         ll p2 = distance2(p);
         if (p1 < p2) {
             // This occurs if the point and vector are facing towards each other.
-            // The actual distance should be 2 more, because we move into the vector head and then move back.
-            return p2 + 2;
+            // The actual distance should be 1 more, because we move into the vector head and then move back.
+            return p2 + 1;
         }
         return p1;
     }
@@ -171,7 +171,7 @@ struct Arrow {
 };
 
 bool cmp(Point a, Point b, int dir) {
-    return (a.x * dx[dir] + a.y * dy[dir]) >= (b.x * dx[dir] + b.y * dy[dir]);
+    return (a.x * dx[dir] + a.y * dy[dir]) > (b.x * dx[dir] + b.y * dy[dir]);
 }
 
 struct LCA {
@@ -260,14 +260,14 @@ int main() {
         });
         // cerr << arrows.size() << endl;
         // Now sort the arrows by the same metric.
-        sort(arrows.begin(), arrows.end(), [dir](const Arrow a, const Arrow b) {
+        sort(arrows.begin(), arrows.end(), [dir](Arrow a, Arrow b) {
             return cmp(a.dirmost(dir), b.dirmost(dir), dir);
         });
         SegmentTree<segNode, segUpdate> st(b+1, segZero, segNoUp);
         int cur_index = 0;
         for (auto p: points) {
             // cerr << p.x << " " << p.y << endl;
-            while (cur_index < arrows.size() && cmp(arrows[cur_index].dirmost(dir), p, dir)) {
+            while (cur_index < arrows.size() && !cmp(p, arrows[cur_index].dirmost(dir), dir)) {
                 // cerr << "Adding arrow " << arrows[cur_index].index << " before point " << p.x << " " << p.y << endl;
                 int p1, p2;
                 if (dir == UP || dir == DOWN) {
@@ -285,20 +285,20 @@ int main() {
             if (par != -1) {
                 ll d1 = arrows[par].distance1(p);
                 ll d2 = arrows[par].distance2(p);
-                // cerr << p.x << " " << p.y << " is distance " << d2 << " from line " << arrows[par].index << ", and " << d1 << " from the endpoint." << endl;
+                cerr << p.x << " " << p.y << " is distance " << d2 << " from line " << arrows[par].index << ", and " << d1 << " from the endpoint." << endl;
                 lca.set_par(p.index, arrows[par].index, d1, d2);
             }
         }
     }
 
     /*for (int i=0; i<n; i++) {
-        cerr << "Arrow " << arrows[i].index << " ends at " << arrows[i].special_point.x << " " << arrows[i].special_point.y << " and has parent " << par[arrows[i].index] << endl;
+        cerr << "Arrow " << arrows[i].index << " ends at " << arrows[i].special_point.x << " " << arrows[i].special_point.y << " and has parent " << lca.par[arrows[i].index][0] << endl;
     }
 
     for (int i=0; i<q; i++) {
-        cerr << "Point " << i << " has parent " << par[n+i] << endl;
-    }*/
-    lca.build();
+        cerr << "Point " << i << " has parent " << lca.par[n+i][0] << endl;
+    }
+    lca.build();*/
 
     // Go back to the correct ordering of arrows.
     sort(arrows.begin(), arrows.end(), [](Arrow a, Arrow b) { return a.index < b.index; });
@@ -307,7 +307,6 @@ int main() {
         // cerr << i << endl;
         ll d = queryDistances[i];
         Point p = queryPoints[i];
-        // cerr << i << endl;
         pair<int, ll> x = lca.last_point(p.index, d);
         // cerr << x.X << endl;
         Point new_point;
