@@ -3,7 +3,6 @@
 #include <cstdio>
 #include <string>
 #include <iostream>
-#include <list>
 #include <vector>
 #include <algorithm>
 
@@ -22,19 +21,11 @@ string board_hint[16];
 vector<vector<int>> hints;
 
 bool is_alice_turn(int s) {
-    if ((s & (1<<16)) == 0) {
-        return true;
-    } else {
-        return false;
-    }
+    return (s & (1<<16)) == 0;
 }
 
 bool mask_met(int s, int mask) {
-    if ((s & mask) == mask) {
-        return true;
-    } else {
-        return false;
-    }
+    return (s & mask) == mask;
 }
 
 // returns 1 if alice wins, 0 if bob wins
@@ -43,7 +34,7 @@ int solve(int s) {
 
     // check if assassin is marked
     if (mask_met(s, assassin_mask)) {
-        // whoevers turn it is now wins
+        // whoevers turn it is now wins since the last player chose the assassin
         if (is_alice_turn(s)) {
             dp_state[s] = 1;
         } else {
@@ -69,9 +60,6 @@ int solve(int s) {
 
     bool player_can_win = false;
     for (int i=0; i<n_hints; ++i) {
-        // string board_hint[16];
-        // vector<vector<int>> hints;
-
         vector<int> this_hints = hints[i];
 
         for (int j=0; j<this_hints.size(); ++j) {
@@ -87,23 +75,23 @@ int solve(int s) {
             int next_s = s;
 
             next_s |= guess_bit; // mark card as used
-            if (is_alice_turn(s) && mask_met(blue_mask, guess_bit)) {
-                // don't need to swap turns
-            } else if (!is_alice_turn(s) && mask_met(red_mask, guess_bit)) {
-                // don't need to swap turns
+
+            if (is_alice_turn(s)) {
+                if (mask_met(blue_mask, guess_bit)) {} else { next_s ^= 1<<16; }
             } else {
-                next_s ^= 1<<16;    // change turns
+                if (mask_met(red_mask, guess_bit)) {} else { next_s ^= 1<<16; }
             }
 
             int winner_from_here = solve(next_s);
 
-            if (is_alice_turn(s) && (winner_from_here==1)) {
-                player_can_win = true;
-                break;
-            } else if (!is_alice_turn(s) && (winner_from_here==0)) {
-                player_can_win = true;
-                break;
+            if (is_alice_turn(s)) {
+                if (winner_from_here==1) { player_can_win = true; }
+            } else {
+                if (winner_from_here==0) { player_can_win = true; }
             }
+
+            // since we have tried to play a card now, we must stop
+            break;
         }
 
         if (player_can_win) { break; }
