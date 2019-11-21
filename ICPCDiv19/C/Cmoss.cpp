@@ -76,8 +76,9 @@ int solve(int s) {
 
         for (int j=0; j<this_hints.size(); ++j) {
             int guess = this_hints[j];
+            int guess_bit = 1 << guess;
             // has this card already been guessed?
-            if (mask_met(s, 1<<guess)) {
+            if (mask_met(s, guess_bit)) {
                 // cant play again
                 continue;
             }
@@ -85,8 +86,14 @@ int solve(int s) {
             // can at least play this card
             int next_s = s;
 
-            next_s |= 1<<guess; // mark card as used
-            next_s ^= 1<<16;    // change turns
+            next_s |= guess_bit; // mark card as used
+            if (is_alice_turn(s) && mask_met(blue_mask, guess_bit)) {
+                // don't need to swap turns
+            } else if (!is_alice_turn(s) && mask_met(red_mask, guess_bit)) {
+                // don't need to swap turns
+            } else {
+                next_s ^= 1<<16;    // change turns
+            }
 
             int winner_from_here = solve(next_s);
 
@@ -177,16 +184,6 @@ int main() {
                 }
             }
         }
-
-        /*
-        cout << "Set " << i << " guesses: ";
-        for (auto w : guesses) cout << w << ' ';
-        cout << endl;
-
-        cout << "Set " << i << " guesses: ";
-        for (auto w : num_hints) cout << w << ' ';
-        cout << endl;
-        */
 
         hints.push_back(num_hints);
     }
