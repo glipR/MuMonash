@@ -102,6 +102,7 @@ struct segNode {
 
 struct segUpdate {
     ll value;
+    int time;
 
     // How do we apply an operation?
     segNode operator()(const segNode &n) {
@@ -111,7 +112,7 @@ struct segUpdate {
 
     segUpdate operator+(const segUpdate &u) {
         if (value == -1) return { u.value };
-        return { value };
+        return { time < u.time ? u.value : value };
     }
 };
 
@@ -253,7 +254,6 @@ int main() {
             if (a.special_point.dir == dir) points.push_back(a.special_point);
         }
         for (auto p: queryPoints) if (p.dir == dir) points.push_back(p);
-        cerr << points.size() << endl;
         // Sort these points from their furthest along in their respective direction decreasing.
         sort(points.begin(), points.end(), [dir](const Point a, const Point b) {
             return cmp(a, b, dir);
@@ -265,6 +265,7 @@ int main() {
         });
         SegmentTree<segNode, segUpdate> st(b+1, segZero, segNoUp);
         int cur_index = 0;
+        int update_time = 0;
         for (auto p: points) {
             // cerr << p.x << " " << p.y << endl;
             while (cur_index < arrows.size() && !cmp(p, arrows[cur_index].dirmost(dir), dir)) {
@@ -277,7 +278,7 @@ int main() {
                     p1 = min(arrows[cur_index].y1, arrows[cur_index].y2);
                     p2 = max(arrows[cur_index].y1, arrows[cur_index].y2);
                 }
-                st.upd(p1, p2, { cur_index });
+                st.upd(p1, p2, { cur_index, update_time++ });
                 cur_index++;
             }
             int loc = abs(dy[dir]) * p.x + abs(dx[dir]) * p.y;
@@ -285,7 +286,7 @@ int main() {
             if (par != -1) {
                 ll d1 = arrows[par].distance1(p);
                 ll d2 = arrows[par].distance2(p);
-                cerr << p.x << " " << p.y << " is distance " << d2 << " from line " << arrows[par].index << ", and " << d1 << " from the endpoint." << endl;
+                // cerr << p.x << " " << p.y << " is distance " << d2 << " from line " << arrows[par].index << ", and " << d1 << " from the endpoint." << endl;
                 lca.set_par(p.index, arrows[par].index, d1, d2);
             }
         }
@@ -297,8 +298,8 @@ int main() {
 
     for (int i=0; i<q; i++) {
         cerr << "Point " << i << " has parent " << lca.par[n+i][0] << endl;
-    }
-    lca.build();*/
+    }*/
+    lca.build();
 
     // Go back to the correct ordering of arrows.
     sort(arrows.begin(), arrows.end(), [](Arrow a, Arrow b) { return a.index < b.index; });
