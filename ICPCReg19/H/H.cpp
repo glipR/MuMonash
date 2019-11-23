@@ -75,6 +75,7 @@ int main() {
         } else {
             d.add_edge(0, i+1, 1);
             // Can we now solve this flow problem?
+            // max_flow returns the CHANGE in flow, so 1 makes sense, not the number of locks.
             if (d.max_flow(0, n+1) != 1) {
                 // No. We can move just before this lock
                 done = true;
