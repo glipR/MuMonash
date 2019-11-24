@@ -48,7 +48,10 @@ int main() {
         for (int a=i+1; a<n; a++) {
             if (!grid[a][j]) break;
             if (interesting(a, j)) {
-                for (auto v: adj[encode(i, j)]) if (decode(v).Y == j) adj[v].push_back(encode(a, j));
+                for (auto v: adj[encode(i, j)]) if (decode(v).Y == j) {
+                    adj[v].push_back(encode(a, j));
+                    adj[encode(a, j)].push_back(v);
+                }
                 adj[encode(i, j)].push_back(encode(a, j));
                 adj[encode(a, j)].push_back(encode(i, j));
                 break;
@@ -57,7 +60,10 @@ int main() {
         for (int b=j+1; b<n; b++) {
             if (!grid[i][b]) break;
             if (interesting(i, b)) {
-                for (auto v: adj[encode(i, j)]) if (decode(v).X == i) adj[v].push_back(encode(i, b));
+                for (auto v: adj[encode(i, j)]) if (decode(v).X == i) {
+                    adj[v].push_back(encode(i, b));
+                    adj[encode(i, b)].push_back(v);
+                }
                 adj[encode(i, j)].push_back(encode(i, b));
                 adj[encode(i, b)].push_back(encode(i, j));
                 break;
@@ -82,6 +88,7 @@ int main() {
     while (dist[encode(n-1, n-1)] == top_dist) {
         vi new_points;
         for (auto p: points) {
+            if (dist[p] != top_dist) continue;
             dist[p] = iter;
             for (auto v: adj[p]) if (dist[v] == top_dist) new_points.push_back(v);
         }
