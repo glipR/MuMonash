@@ -1,4 +1,3 @@
-import functools, sys
-(n, b), values, foo = map(int, input().split()), sorted(list(map(int, input().split()))), sys.setrecursionlimit(10000000)
-solve = functools.lru_cache(maxsize=10000000)(lambda i, j: 1e24 if j == 0 else (min(pow((values[-1] - values[i]),2),*tuple(pow(values[i] - values[x-1], 2) + solve(x, j-1) for x in range(i+1, n))) if i+1 != n else pow((values[-1] - values[i]),2)))
-print(solve(0, b))
+import functools,sys
+(n,b),v,_,s=map(int,input().split()),sorted(list(map(int,input().split()))),sys.setrecursionlimit(10000000),functools.lru_cache(maxsize=1000000)(lambda i,j:j and (min((v[-1]-v[i])**2,*tuple((v[i]-v[x-1])**2+s(x,j-1) for x in range(i+1, n))) if i+1!=n else (v[-1]-v[i])**2) or 1e24)
+print(s(0,b))
