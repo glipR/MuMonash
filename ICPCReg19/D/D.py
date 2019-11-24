@@ -1,7 +1,1 @@
-n, m = map(int, input().split())
-letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'[:m]
-amount = 0
-for x in range(n):
-    word = input()
-    if len(set(word)) == len(word) and all(x in letters for x in word): amount += 1
-print(amount)
+print((lambda n,m:sum(map(lambda w:len(set(w))==len(w) and all(x in 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'[:m] for x in w),(input() for _ in range(n)))))(*map(int,input().split())))
