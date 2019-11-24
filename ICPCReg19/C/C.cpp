@@ -37,13 +37,13 @@ int main() {
 
     if (n == 1)
         if (vp[0].deg == 0) { cout << "Yes" << endl; }
-        else { cout << "No" << endl; }
+        else { cout << -1 << endl; }
     else {
     vi deg2;
     for (int i=0;i<n;i++) {
         if (vp[i].deg == 2) deg2.push_back(i);
     }
-    if (deg2.size() != 4 ) { cout << "No" << endl; }
+    if (deg2.size() != 4 ) { cout << -1 << endl; }
     else {
     vi par(n, -1);
     vi dist(n, -1);
@@ -60,7 +60,7 @@ int main() {
     int m = max(max(dist[deg2[1]], dist[deg2[2]]), dist[deg2[3]]);
     bool bad = false;
     for (int i=0; i<n; i++) if (dist[i] == -1) { bad = true; break; }
-    if (bad) { cout << "No" << endl; }
+    if (bad) { cout << -1 << endl; }
     else {
     if (dist[deg2[1]] == m) {
         int a = deg2[1];
@@ -77,7 +77,7 @@ int main() {
         }
     }
     if (n % top_row.size()) { bad = true; }
-    if (bad) { cout << "No" << endl; }
+    if (bad) { cout << -1 << endl; }
     else {
     // Check all of the neighbours in the top row.
     bad = false;
@@ -88,13 +88,14 @@ int main() {
         }
         bad |= bad_check;
     }
-    if (bad) { cout << "No" << endl; }
+    if (bad) { cout << -1 << endl; }
     else {
     // Start adding each row.
     bad = false;
     vector<bool> matched(n, false);
     for (auto a: top_row) matched[a] = true;
-    // cerr << top_row.size() << endl;
+    vvi final_elems (1, vi());
+    for (int i=0; i<top_row.size(); i++) final_elems[0].push_back(top_row[i]);
     for (int i=0; i<(n/top_row.size())-1; i++) {
         vi next_row;
         for (int i=0; i<top_row.size(); i++) if (!bad) {
@@ -116,15 +117,26 @@ int main() {
             }
         }
         top_row = next_row;
+        final_elems.push_back(vi());
+        for (int k=0; k<top_row.size(); k++) final_elems[i+1].push_back(top_row[k]);
     }
-    if (bad) { cout << "No" << endl; }
+    if (bad) { cout << -1 << endl; }
     else {
     // Last: Check degrees.
     for (int i=1; i<top_row.size()-1; i++) if (vp[top_row[i]].deg != 3) { bad = true; break; }
     if (vp[top_row[0]].deg != 2) { bad = true; }
     if (vp[top_row[top_row.size()-1]].deg != 2) { bad = true; }
-    if (bad) { cout << "No" << endl; }
-    else { cout << "Yes" << endl; }
+    if (bad) { cout << -1 << endl; }
+    else {
+        cout << final_elems.size() << " " << final_elems[0].size() << endl;
+        for (int i=0; i<final_elems.size(); i++) {
+            cout << final_elems[i][0] + 1;
+            for (int j=1; j<final_elems[i].size(); j++) {
+                cout << " " << final_elems[i][j] + 1;
+            }
+            cout << endl;
+        }
+    }
     }
     }
     }
