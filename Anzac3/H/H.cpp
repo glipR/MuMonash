@@ -53,7 +53,7 @@ Node::Node(int i, int par, int parCol, int parIndex) {
         nodes[x.first] = n;
         up_prop.push_back(false);
     }
-    sort(children.begin(), children.end(), [](pii x, pii y) { return x.second > y.second; });
+    sort(children.begin(), children.end(), [](const pii &x, const pii &y) -> bool { return x.second > y.second; });
 }
 
 void Node::prop_bad_down() {
