@@ -10,6 +10,7 @@ typedef pair<int, int> pii;
 vector<vector<pii> > edges;
 
 class Node {
+public:
     int parentID;
     int parentCol;
     int parentIndex;
@@ -129,7 +130,7 @@ int main () {
         good.push_back(i+1);
     }
 
-    cout << good.size(); << endl;
+    cout << good.size() << endl;
     for (auto x: good) {
         cout << x << endl;
     }
