@@ -50,16 +50,19 @@ Node::Node(int i, int par, int parCol, int parIndex) {
     children = vector<pii>();
     up_prop = vector<bool>();
 
-    int j=0;
     for (auto x: edges[ID]) {
         if (parentID == x.first)
             continue;
-        Node n = Node(x.first, i, x.second, j++);
+        Node n = Node(x.first, i, x.second, -1);
         children.push_back(x);
         nodes[x.first] = n;
         up_prop.push_back(false);
     }
     sort(children.begin(), children.end(), left_less());
+    int j=0;
+    for (auto x: children) {
+        nodes[x.first].parentIndex = j++;
+    }
 }
 
 void Node::prop_bad_down() {
@@ -81,9 +84,8 @@ void Node::prop_bad_up(int chInd) {
     if (parentID != -1) {
         nodes[parentID].prop_bad_up(parentIndex);
     }
-    int j = 0;
     for (auto x: children) {
-        if (j++ != nodes[x.first].parentIndex) {
+        if (chInd != nodes[x.first].parentIndex) {
             nodes[x.first].prop_bad_down();
         }
     }
