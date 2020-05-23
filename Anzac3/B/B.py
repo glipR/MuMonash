@@ -3,6 +3,9 @@ probs = list(map(float, input().split()))
 min_change = None
 
 for i in range(6):
+    if probs[i] == 0:
+        continue
+
     #print(f'looking at {i}')
     # 3.5 = r*p1 + 2*p2 + ...
     # 3.5 - 2*p2 - 3*p3 - ... = r*p1
