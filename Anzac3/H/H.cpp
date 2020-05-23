@@ -9,6 +9,12 @@ typedef pair<int, int> pii;
 
 vector<vector<pii> > edges;
 
+struct left_less {
+    inline bool operator() (const pii& r1, const pii& r2) {
+        return (r1.second < r2.second);
+    }
+};
+
 class Node {
 public:
     int parentID;
@@ -53,7 +59,7 @@ Node::Node(int i, int par, int parCol, int parIndex) {
         nodes[x.first] = n;
         up_prop.push_back(false);
     }
-    sort(children.begin(), children.end(), [](const pii &x, const pii &y) -> bool { return x.second > y.second; });
+    sort(children.begin(), children.end(), left_less());
 }
 
 void Node::prop_bad_down() {
