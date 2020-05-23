@@ -1,5 +1,5 @@
 class Chunk:
-    def __init__(self, a, b=1e10, single_char=False):
+    def __init__(self, a, b=1e10 + 20000, single_char=False):
         if not single_char:
             self.a = int(a) # Inclusive
             self.b = int(b) # Inclusive
@@ -24,6 +24,8 @@ class Chunk:
         return "[{}:{}]".format(self.a, self.b)
 
     def merge(self, other):
+        if self.single_char or other.single_char:
+            return False
         if self.b in [other.a, other.a - 1]:
             self.b = other.b
             return True
@@ -99,68 +101,25 @@ for i, working_chunk in enumerate([chunks1, chunks2]):
 #        print(list(map(str, working_chunk)))
 
 
-for working_chunks in [chunks1, chunks2]:
-    pointer = 0
-    while pointer + 1 < len(working_chunks):
-        if working_chunks[pointer].single_char or working_chunks[pointer + 1].single_char:
-            pointer += 1
-            continue
-        if working_chunks[pointer].merge(working_chunks[pointer + 1]):
-            del working_chunks[pointer + 1]
-            pointer -= 1
+merged_chunks = [[chunks1[0]], [chunks2[0]]]
+
+for i, working_chunks in enumerate([chunks1, chunks2]):
+    pointer = 1
+    while pointer < len(working_chunks):
+        if not merged_chunks[i][-1].merge(working_chunks[pointer]):
+            merged_chunks[i].append(working_chunks[pointer])
         pointer += 1
 
-#print(list(map(str,chunks1)), list(map(str, chunks2)))
 
-if len(chunks1) != len(chunks2):
+#print(list(map(str,merged_chunks[0])), list(map(str, merged_chunks[1])))
+
+if len(merged_chunks[0]) != len(merged_chunks[1]):
     print(1)
 else:
-    for i in range(len(chunks1)):
-        if not chunks1[i].equals(chunks2[i]):
+    for i in range(len(merged_chunks[0])):
+        if not merged_chunks[0][i].equals(merged_chunks[1][i]):
             print(1)
             break
     else:
         print(0)
-
-"""
-if lens[0] != lens[1]:
-    print(1)
-else:
-    partial_matched = [0, 0]
-    p = [0, 0]
-    while p[0] < len(chunks1) and p[1] < len(chunks2):
-        if chunks1[p[0]].single_char and chunks2[p[1]].single_char:
-            if chunks1[p[0]].char == chunks2[p[1]].char:
-                for i in range(2):
-                    p[i] += 1
-                continue
-            else:
-                break
-
-        if chunks1[p[0]].single_char or chunks2[p[1]].single_char:
-            break
-
-        covering = chunks1[p[0]].offset(partial_matched[0]).covering(chunks2[p[0]].offset(partial_matched[1]))
-
-        if covering == 0:
-            break
-
-        for i in range(2):
-            partial_matched[i] += covering
-        if partial_matched[0] == len(chunks1[p[0]]):
-            p[0] += 1
-            partial_matched[0] = 0
-        if partial_matched[1] == len(chunks2[p[1]]):
-            p[1] += 1
-            partial_matched[1] = 0
-
-    # print(list(map(str,chunks1)), list(map(str, chunks2)))
-
-    if p[0] < len(chunks1) or p[1] < len(chunks2):
-        print(1)
-    else:
-        print(0)
-"""
-
-        
 
