@@ -17,7 +17,7 @@ struct Chunk {
     char c;
     bool deleted;
 
-    Chunk (int x, ll y) : a(x), b(y), is_single_char(false), deleted(false) {};
+    Chunk (ll x, ll y) : a(x), b(y), is_single_char(false), deleted(false) {};
     Chunk (char character) : c(character), is_single_char(true), deleted(false) {};
 
     ll size()
@@ -76,7 +76,7 @@ void perform_delete(int index, ll pos)
     {
         ll remaining = pos - skipped;
         ll a = text[index][chunk_id].a, b = text[index][chunk_id].b;
-
+        
         Chunk left = Chunk(a, a + remaining - 2);
         Chunk right = Chunk(a + remaining, b);
 
@@ -175,6 +175,9 @@ int main()
     bool failed = merged[0].size() != merged[1].size();
     for (int i = 0; i < merged[0].size() && !failed; i++)
         failed |= !merged[0][i].equals(merged[1][i]);
+
+    //print(merged[0]);
+    //print(merged[1]);
 
     cout << (int) failed << endl;
 
