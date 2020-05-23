@@ -49,6 +49,7 @@ struct Tree {
         gen_above(0);
     }
 
+    // NlogN time - Can make faster by using the same strategy as maximum calculation.
     void gen_minims() {
         priority_queue<pair<ll, ll> > pq;
         for (ll i=0; i<n; i++) if (judge[i]) {
