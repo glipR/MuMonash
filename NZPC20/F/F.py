@@ -1,6 +1,6 @@
 from collections import deque
 
-DEBUG = True
+DEBUG = False
 
 SEEKING = 0
 IN_TAG = 1
