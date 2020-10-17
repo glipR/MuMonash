@@ -29,8 +29,8 @@ void RUNTIME()
 
 ll euclidean(ll dx, ll dy, bool reverse) {
     ll t = dx * dx + dy * dy;
-//    double d = ceil(sqrt(t));
-//    return (ll)d;
+    double d = reverse ? floor(sqrt(t)) : ceil(sqrt(t));
+    return (ll)d;
 
     ll r = t + 1;
     ll l = 0;
@@ -50,6 +50,12 @@ ll euclidean(ll dx, ll dy, bool reverse) {
             else l = mid;
         }
     }
+
+    if ((reverse && l * l > t) || (!reverse && r * r < t))
+        RUNTIME();
+
+    if ((reverse && (l+1)*(l+1) <= t) || (!reverse && (r-1)*(r-1) >= t))
+        RUNTIME();
 
     return reverse ? l : r;
 }
@@ -146,7 +152,6 @@ int main() {
     for (int i = 0; i < n; i++) {
         for (int j = i+1; j < n; j++) {
             ll dist = euclidean(stones[i].first - stones[j].first, stones[i].second - stones[j].second, 0) - 2;
-//            dist = max(dist, (ll)0);
             if (dist < 0)
                 RUNTIME();
             edges[i][j].dist = dist;
@@ -156,23 +161,17 @@ int main() {
         }
         // Island
         ll idist = euclidean(stones[i].first, stones[i].second, 0) - 1 - island;
-  //      idist = max(idist, (ll)0);
         if (idist < 0)
             RUNTIME();
         edges[i][n].dist = idist;
         edges[n][i].dist = idist;
-        //edges[i][n].set_dist(idist);
-        //edges[n][i].set_dist(idist);
 
         // Lake
         ll ldist = lake - euclidean(stones[i].first, stones[i].second, 1) - 1;
-    //    ldist = max(ldist, (ll)0);
         if (ldist < 0)
             RUNTIME();
         edges[i][n+1].dist = ldist;
         edges[n+1][i].dist = ldist;
-        //edges[i][n+1].set_dist(ldist);
-        //edges[n+1][i].set_dist(ldist);
     }
 
     edges[n][n+1].dist = lake - island;
