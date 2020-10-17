@@ -8,6 +8,7 @@
 #include <stdio.h>
 #include <queue>
 #include <math.h>
+#include <cmath>
 
 #define mp(a, b) make_pair(a,b)
 #define pb(a) push_back(a)
@@ -19,37 +20,45 @@ typedef vector<int> vi;
 typedef vector<vi> vii;
 typedef pair<int, int> pii;
 
-ll euclidean(ll dx, ll dy) {
+void RUNTIME()
+{
+    int A = 10;
+    int B = A / 2;
+    cout << 1 / (A - B - B);
+}
+
+ll euclidean(ll dx, ll dy, bool reverse) {
     ll t = dx * dx + dy * dy;
-    ll r = t / 2 + 1;
+//    double d = ceil(sqrt(t));
+//    return (ll)d;
+
+    ll r = t + 1;
     ll l = 0;
     while (r - l > 1)
     {
         ll mid = (r + l) / 2;
-        if (mid * mid >= t)
-            r = mid;
-        else l = mid;
+        if (reverse)
+        {
+            if (mid * mid <= t)
+                l = mid;
+            else r = mid;
+        }
+        else
+        {
+            if (mid * mid >= t)
+                r = mid;
+            else l = mid;
+        }
     }
-    return r;
-    // return sqrt(dx*dx + dy*dy);
-}
 
-/*template <typename F, typename C> struct MinCostFlow {
-    struct edge { int from, to; F flow, cap; C cost; };
-    const C INF = numeric_limits<C>::max(); vector<C> pi, dist;
-    int n, m; vi pred, pe; vvi g; vector<edge> edges;
-    typedef pair<C, int> pci; priority_queue<pci, vector<pci>
-}*/
+    return reverse ? l : r;
+}
 
 struct Edge {
     ll dist;
     int s, t;
     int cap;
     Edge () {cap = 1;}
-//    void set_dist(double d)
-  //  {
-    //    dist = (ll)(ceil(d));
-    //}
 };
 
 const int MAXN = 1010;
@@ -120,13 +129,6 @@ bool find_path(int dist)
     return true;
 }
 
-void RUNTIME()
-{
-    int A = 10;
-    int B = A / 2;
-    cout << 1 / (A - B - B);
-}
-
 int main() {
 
     vector<pii > stones;
@@ -143,7 +145,8 @@ int main() {
     // Vertices are 0-(n-1) for stones, n for island, and n+1 for outside island.
     for (int i = 0; i < n; i++) {
         for (int j = i+1; j < n; j++) {
-            ll dist = euclidean(stones[i].first - stones[j].first, stones[i].second - stones[j].second) - 2;
+            ll dist = euclidean(stones[i].first - stones[j].first, stones[i].second - stones[j].second, 0) - 2;
+//            dist = max(dist, (ll)0);
             if (dist < 0)
                 RUNTIME();
             edges[i][j].dist = dist;
@@ -152,7 +155,8 @@ int main() {
             // edges[j][i].set_dist(dist);
         }
         // Island
-        ll idist = euclidean(stones[i].first, stones[i].second) - 1 - island;
+        ll idist = euclidean(stones[i].first, stones[i].second, 0) - 1 - island;
+  //      idist = max(idist, (ll)0);
         if (idist < 0)
             RUNTIME();
         edges[i][n].dist = idist;
@@ -161,7 +165,8 @@ int main() {
         //edges[n][i].set_dist(idist);
 
         // Lake
-        ll ldist = lake - euclidean(stones[i].first, stones[i].second) - 1;
+        ll ldist = lake - euclidean(stones[i].first, stones[i].second, 1) - 1;
+    //    ldist = max(ldist, (ll)0);
         if (ldist < 0)
             RUNTIME();
         edges[i][n+1].dist = ldist;
