@@ -27,37 +27,37 @@ void RUNTIME()
     cout << 1 / (A - B - B);
 }
 
+ll floorSqrt(ll x)  
+{     
+    if (x == 0 || x == 1)  
+       return x; 
+  
+    ll l = 1, r = x, ans;    
+    while (l <= r)  
+    {         
+        ll mid = (l + r) / 2; 
+        
+        if (mid*mid == x) 
+            return mid; 
+  
+        if (mid*mid < x)  
+        { 
+            l = mid + 1; 
+            ans = mid; 
+        }  
+        else r = mid-1;         
+    } 
+    return ans; 
+}
+
 ll euclidean(ll dx, ll dy, bool reverse) {
     ll t = dx * dx + dy * dy;
-    double d = reverse ? floor(sqrt(t)) : ceil(sqrt(t));
-    return (ll)d;
 
-    ll r = t + 1;
-    ll l = 0;
-    while (r - l > 1)
-    {
-        ll mid = (r + l) / 2;
-        if (reverse)
-        {
-            if (mid * mid <= t)
-                l = mid;
-            else r = mid;
-        }
-        else
-        {
-            if (mid * mid >= t)
-                r = mid;
-            else l = mid;
-        }
-    }
-
-    if ((reverse && l * l > t) || (!reverse && r * r < t))
-        RUNTIME();
-
-    if ((reverse && (l+1)*(l+1) <= t) || (!reverse && (r-1)*(r-1) >= t))
-        RUNTIME();
-
-    return reverse ? l : r;
+    if (reverse) return floorSqrt(t);
+    ll d = floorSqrt(t);
+    if (d * d == t)
+        return d;
+    return d + 1;
 }
 
 struct Edge {
@@ -152,8 +152,8 @@ int main() {
     for (int i = 0; i < n; i++) {
         for (int j = i+1; j < n; j++) {
             ll dist = euclidean(stones[i].first - stones[j].first, stones[i].second - stones[j].second, 0) - 2;
-            if (dist < 0)
-                RUNTIME();
+            //if (dist < 0)
+                //RUNTIME();
             edges[i][j].dist = dist;
             edges[j][i].dist = dist;
             // edges[i][j].set_dist(dist);
@@ -161,8 +161,8 @@ int main() {
         }
         // Island
         ll idist = euclidean(stones[i].first, stones[i].second, 0) - 1 - island;
-        if (idist < 0)
-            RUNTIME();
+        //if (idist < 0)
+            //RUNTIME();
         edges[i][n].dist = idist;
         edges[n][i].dist = idist;
 
