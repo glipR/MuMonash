@@ -6,6 +6,7 @@
 #include <vector>
 #include <stdlib.h>
 #include <stdio.h>
+#include <queue>
 
 using namespace std;
 
@@ -21,6 +22,7 @@ template <typename F, typename C> struct MinCostFlow {
     struct edge { int from, to; F flow, cap; C cost; };
     const C INF = numeric_limits<C>::max(); vector<C> pi, dist;
     int n, m; vi pred, pe; vvi g; vector<edge> edges;
+    typedef pair<C, int> pci; priority_queue<pci, vector<pci>
 }
 
 int main() {
