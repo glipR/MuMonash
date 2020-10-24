@@ -1,3 +1,4 @@
+EPS = 1e-8
 import sys
 sys.setrecursionlimit(20000)
 import math
@@ -31,7 +32,7 @@ for case in range(1, T+1):
             ma10 = max(p1[x][0] for x in range(p1_index))
             mi11 = min(p1[x][1] for x in range(p1_index))
             ma11 = max(p1[x][1] for x in range(p1_index))
-            if ma10 - mi10 <= math.pi or ma11 - mi11 <= math.pi:
+            if ma10 - mi10 < math.pi + EPS or ma11 - mi11 < math.pi + EPS:
                 print("YES")
             else:
                 print("NO")
@@ -41,7 +42,7 @@ for case in range(1, T+1):
             ma00 = max(p0[x][0] for x in range(p0_index))
             mi01 = min(p0[x][1] for x in range(p0_index))
             ma01 = max(p0[x][1] for x in range(p0_index))
-            if ma00 - mi00 <= math.pi or ma01 - mi01 <= math.pi:
+            if ma00 - mi00 < math.pi + EPS or ma01 - mi01 < math.pi + EPS:
                 print("YES")
             else:
                 print("NO")
@@ -55,9 +56,9 @@ for case in range(1, T+1):
         mi11 = min(p1[x][1] for x in range(p1_index))
         ma11 = max(p1[x][1] for x in range(p1_index))
         bad = False
-        if ma00 - mi00 <= math.pi:
+        if ma00 - mi00 < math.pi + EPS:
             for x in range(p1_index):
-                if mi00 < p1[x][0] < ma00:
+                if mi00 + EPS < p1[x][0] < ma00 - EPS:
                     # All over
                     bad = True
                     break
@@ -65,14 +66,14 @@ for case in range(1, T+1):
                 print("NO")
                 continue
             # Possible. We need to check that p1 also sits on a hemidisk. 
-            if ma10 - mi10 <= math.pi or ma11 - mi11 <= math.pi:
+            if ma10 - mi10 < math.pi + EPS or ma11 - mi11 < math.pi + EPS:
                 print("YES")
             else:
                 print("NO")
             continue
-        elif ma01 - mi01 <= math.pi:
+        elif ma01 - mi01 < math.pi + EPS:
             for x in range(p1_index):
-                if mi01 < p1[x][1] < ma01:
+                if mi01 + EPS < p1[x][1] < ma01 - EPS:
                     # All over
                     bad = True
                     break
@@ -80,7 +81,7 @@ for case in range(1, T+1):
                 print("NO")
                 continue
             # Possible. We need to check that p1 also sits on a hemidisk.
-            if ma10 - mi10 <= math.pi or ma11 - mi11 <= math.pi:
+            if ma10 - mi10 < math.pi + EPS or ma11 - mi11 < math.pi + EPS:
                 print("YES")
             else:
                 print("NO")
