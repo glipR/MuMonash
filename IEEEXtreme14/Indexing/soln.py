@@ -60,13 +60,15 @@ all_words = count_element(tree)
 
 # print(f'n_words={n_words}')
 
-densities = [(-100*all_words[w]/n_words, w) for w in index_terms]
+densities = [(-all_words[w], w) for w in index_terms if all_words[w]>0]
 n_printed = 0
-last_d = None
-for d, w in sorted(densities):
-    d = -d
-    if last_d is None or last_d == d or n_printed < 3:
+last_count = None
+
+for count, w in sorted(densities):
+    count = -count
+    if last_count is None or last_count == count or n_printed < 3:
+        d = 100 * (count / n_words)
         print(f"{w}: {d}")
-        last_d = d
+        last_count = count
         n_printed += 1
 
