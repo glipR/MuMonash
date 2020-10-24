@@ -6,13 +6,13 @@ w, h, a, b, m, c = list(map(int, input().split()))
 tile_horizontal = math.ceil(w / a)
 tile_vertical = math.ceil(h / b)
 
-getcontext().prec = 128
-res = (Decimal(tile_horizontal * 1e-6) * Decimal(tile_vertical * 1e-6)) / Decimal(10)
+getcontext().prec = 64
+res = ((Decimal(tile_horizontal) * Decimal(1e-8)) * (Decimal(tile_vertical) * Decimal(1e-8))) / Decimal(10)
 mult = 0
 while res < Decimal(1 / 100):
     res *= Decimal(10)
     mult += 1
-actual_val = list(str(res)[2:16 - mult])
+actual_val = list(str(res)[2:20 - mult])
 if int(actual_val[-1]) >= 5:
     for x in range(len(actual_val)-2, -1, -1):
         if actual_val[x] == '9':
@@ -38,14 +38,14 @@ for x in range(len(total)):
     current /= Decimal(10)
 for x in range(mult):
     current /= Decimal(10)
-current /= Decimal(1e6)
+current /= Decimal(1e8)
 current *= Decimal(m)
 cut = 0
 if w % a != 0:
     cut += h
 if h % b != 0:
     cut += w
-cut_cost = Decimal(1e-19)
+cut_cost = Decimal(1e-25)
 cut_cost *= Decimal(cut)
 cut_cost *= Decimal(c)
 current += cut_cost
@@ -53,7 +53,7 @@ mult = 0
 while current < Decimal(1 / 100):
     current *= Decimal(10)
     mult += 1
-cur_val = list(str(current)[2:22-mult])
+cur_val = list(str(current)[2:28-mult])
 if int(cur_val[-1]) >= 5:
     for x in range(len(cur_val)-2, -1, -1):
         if cur_val[x] == '9':
