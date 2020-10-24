@@ -1,5 +1,8 @@
 import xml.etree.ElementTree as ET
 from collections import Counter
+import sys
+
+sys.setrecursionlimit(20000)
 
 n_words = 0
 
@@ -11,9 +14,9 @@ def token_to_word(token):
     return token
 
 def line_to_words(line):
-    mostly_words = list(map(token_to_word, line.strip().split()))
-    ehh = [w for w in mostly_words if w not in stop_words]
-    words = [w for w in ehh if len(w) >= 4]
+    maybe_stops = list(map(token_to_word, line.strip().split()))
+    long_tokens = [w for w in maybe_stops if w not in stop_words]
+    words = [w for w in long_tokens if len(w) >= 4]
     return words
 
 stop_words = input().strip().split(';')
@@ -22,7 +25,7 @@ index_terms = input().strip().split(';')
 raw_xml_doc = ""
 line = input()
 while line is not None:
-    raw_xml_doc += line + " "
+    raw_xml_doc += line.strip() + " "
     
     try:
         line = input()
@@ -49,7 +52,6 @@ def count_element(element, weight=0):
     c = Counter(words*weight)
     
     # print(element.tag, weight, words, c)
-    
     
     for child in element:
         c += count_element(child, weight=weight)
