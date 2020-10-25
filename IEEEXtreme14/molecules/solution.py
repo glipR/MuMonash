@@ -5,7 +5,7 @@ for case in range(t):
     c, h, o = list(map(int, input().split()))
     best = c + h + o
     # Loop over possible h values.
-    for glucose in range(int(math.ceil(max(c/6, h/12, o/6)))):
+    for glucose in range(max(0, int(math.floor(min(c/6, h/12, o/6)) - 20)), int(math.ceil(max(c/6, h/12, o/6)))):
         po, pc, ph = 6*glucose, 6*glucose, 12*glucose
         current = 0
         if h < ph:
