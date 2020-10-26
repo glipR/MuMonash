@@ -1,3 +1,6 @@
+import sys
+sys.setrecursionlimit(10000000)
+
 n, m = list(map(int, input().split()))
 
 adjacency = [[] for _ in range(n)]
@@ -14,12 +17,21 @@ for i in range(m):
 
 # Create a DFS tree from vertex 0
 roots = []
+size = []
+unlabel = []
+relabel = [-1]*n
 c = 0
 comp = [-1] * n
+size = []
 parent = [-1] * n
 children = [[] for _ in range(n)]
+clabel = 0
 def dfs(root, actual_root):
+    global clabel
     comp[root] = c
+    relabel[root] = clabel
+    unlabel[c].append(root)
+    clabel += 1
     for child in adjacency[root]:
         if parent[child] == -1 and child != actual_root:
             parent[child] = root
@@ -31,8 +43,11 @@ while cv < n:
     if comp[cv] != -1:
         cv += 1
         continue
+    clabel = 0
+    unlabel.append([])
     dfs(cv, cv)
     roots.append(cv)
+    size.append(clabel)
     cv += 1
     c += 1
 
@@ -69,55 +84,63 @@ class LCA:
 
     LOGN = 20
     
-    def __init__(self, number, parents, level):
+    def __init__(self, number, component):
+        self.c = component
         self.n = number
-        self.par = parents
-        self.lvl = level
         self.anc = [[-1 for x in range(self.LOGN)] for y in range(self.n)]
         self.anc_b = [[-1 for x in range(self.LOGN)] for y in range(self.n)]
 
     def build(self):
         for i in range(self.n):
-            self.anc[i][0] = self.par[i]
+            self.anc[i][0] = relabel[parent[unlabel[self.c][i]]]
             self.anc_b[i][0] = 0
-            if self.par[i] != -1:
-                if red_lvl[i] >= lvl[self.par[i]]:
+            if parent[unlabel[self.c][i]] != -1:
+                if red_lvl[unlabel[self.c][i]] >= lvl[parent[unlabel[self.c][i]]]:
                     self.anc_b[i][0] += 1
         for k in range(1, self.LOGN):
             for i in range(self.n):
                 if self.anc[i][k-1] != -1:
                     self.anc[i][k] = self.anc[self.anc[i][k-1]][k-1]
-                    if (1 << k) <= self.lvl[i]:
+                    if (1 << k) <= lvl[unlabel[self.c][i]]:
                         self.anc_b[i][k] = self.anc_b[i][k-1] + self.anc_b[self.anc[i][k-1]][k-1]
     
     def query(self, u, v):
         total_b = 2
-        if (self.lvl[u] > self.lvl[v]):
+        if (lvl[unlabel[self.c][u]] > lvl[unlabel[self.c][v]]):
             u, v = v, u
-        inc_last = False
+        last = -1
+        previous = v
         for k in range(self.LOGN-1, -1, -1):
-            if (self.lvl[v] - (1 << k) >= self.lvl[u]):
+            if (lvl[unlabel[self.c][v]] - (1 << k) >= lvl[unlabel[self.c][u]]):
+                previous = v
                 total_b += self.anc_b[v][k]
-                if k == 0 and self.anc_b[v][k] > 0:
-                    inc_last = True
+                last = k
                 v = self.anc[v][k]
+        # Now, check if, from last, root is required.
+        unneccessary = 0
+        if last != -1:
+            for k in range(last):
+                previous = self.anc[previous][k]
+            # previous is now directly below u.
+            if red_lvl[unlabel[self.c][previous]] >= lvl[parent[unlabel[self.c][previous]]]:
+                unneccessary = 1
         if u == v:
-            return u, total_b - int(inc_last)
+            return u, total_b - unneccessary
         for k in range(self.LOGN-1, -1, -1):
             if (self.anc[u][k] == self.anc[v][k]): continue
             total_b += self.anc_b[u][k] + self.anc_b[v][k]
             u = self.anc[u][k]
             v = self.anc[v][k]
         total_b += 1
-        if red_lvl[u] < self.lvl[self.par[u]] and red_lvl[v] < self.lvl[self.par[v]]:
+        if red_lvl[unlabel[self.c][u]] < lvl[parent[unlabel[self.c][u]]] and red_lvl[unlabel[self.c][v]] < lvl[parent[unlabel[self.c][v]]]:
             total_b -= 1
 
-        return self.par[u], total_b
+        return parent[unlabel[self.c][u]], total_b
 
 lcas = []
 for root in roots:
 
-    obj = LCA(n, parent, lvl)
+    obj = LCA(size[comp[root]], comp[root])
     obj.build()
     lcas.append(obj)
 
@@ -126,5 +149,5 @@ for x in range(q):
     f, s = list(map(int, input().split()))
     f -= 1
     s -= 1
-    top, blues = lcas[comp[f]].query(f, s)
+    _, blues = lcas[comp[f]].query(relabel[f], relabel[s])
     print(blues)
