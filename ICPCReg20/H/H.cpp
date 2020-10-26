@@ -29,6 +29,7 @@ void RUNTIME()
 
 ll floorSqrt(ll x)  
 {     
+    return floor(sqrt(x));
     if (x == 0 || x == 1)  
        return x; 
   
@@ -60,40 +61,40 @@ ll euclidean(ll dx, ll dy, bool reverse) {
     return d + 1;
 }
 
+const int MAXN = 2010;
+const int MAXW = 1000000010;
+
 struct Edge {
     ll dist;
-    int s, t;
-    int cap;
-    Edge () {cap = 1;}
+    ll cap;
+    Edge () {cap = 1; dist = MAXW; }
 };
 
-const int MAXN = 1010;
 int n;
 Edge edges[MAXN][MAXN];
 int edge_changes[MAXN][MAXN];
 
 int parent[MAXN];
 
+int O;
+
 bool find_path(int dist)
 {
     vector<int> neis[MAXN];
-    for (int i = 0; i < n + 2; i++)
-        for (int j = i + 1; j < n + 2; j++)
+    for (int i = 0; i < 2*n + 2; i++)
+        for (int j = 0; j < 2*n + 2; j++)
             if (edges[i][j].dist <= dist)
             {
                 neis[i].pb(j);
-                neis[j].pb(i);
 
-                edges[i][j].cap = (i + j == 2*n + 1) ? 10 : 1; //edge_changes[i][j];
-                edges[j][i].cap = edges[i][j].cap; //edge_changes[j][i];
+                edges[i][j].cap += edge_changes[i][j];
 
-                // edge_changes[i][j] = 0;
-                // edge_changes[j][i] = 0;
+                edge_changes[i][j] = 0;
             }
    
     for (int i = 0; i < 4; i++)
     {
-        fill(parent, parent + n + 2, -1);
+        fill(parent, parent + 2*n + 2, -1);
         queue<int> q;
         q.push(n);
         parent[n] = -2;
@@ -104,17 +105,20 @@ bool find_path(int dist)
         {
             int front = q.front();
             q.pop();
+            // if (dist == 4) cerr << front << " added: ";
             for (auto nei : neis[front])
             {
                 if (edges[front][nei].cap > 0 && parent[nei] == -1)
                 {
                     q.push(nei);
+                    // cerr << nei << ", ";
                     parent[nei] = front;
                     if (nei == n+1)
                         found = true;
                 }
                 if (found) break;
             }
+ //           cerr << endl;
         }
         
         if (!found)
@@ -126,8 +130,8 @@ bool find_path(int dist)
             edges[parent[current]][current].cap--;
             edges[current][parent[current]].cap++;
 
-            // edge_changes[parent[current]][current]++;
-            // edge_changes[current][parent[current]]--;
+            edge_changes[parent[current]][current]++;
+            edge_changes[current][parent[current]]--;
 
             current = parent[current];
         }
@@ -137,13 +141,14 @@ bool find_path(int dist)
 
 int main() {
 
-    vector<pii > stones;
+    vector<pair<ll, ll> > stones;
 
-    int lake, island;
+    ll lake, island;
     cin >> lake >> island >> n;
+    O = n + 2;
 
     for (int i = 0; i < n; i++) {
-        int sx, sy;
+        ll sx, sy;
         cin >> sx >> sy;
         stones.push_back(mp(sx, sy));
     }
@@ -152,32 +157,39 @@ int main() {
     for (int i = 0; i < n; i++) {
         for (int j = i+1; j < n; j++) {
             ll dist = euclidean(stones[i].first - stones[j].first, stones[i].second - stones[j].second, 0) - 2;
-            //if (dist < 0)
-                //RUNTIME();
-            edges[i][j].dist = dist;
-            edges[j][i].dist = dist;
-            // edges[i][j].set_dist(dist);
-            // edges[j][i].set_dist(dist);
+            edges[i + O][j].dist = dist;
+            edges[j][i + O].dist = dist; edges[j][i + O].cap = 0;
+            edges[j + O][i].dist = dist;
+            edges[i][j + O].dist = dist; edges[i][j + O].cap = 0;
         }
+
         // Island
         ll idist = euclidean(stones[i].first, stones[i].second, 0) - 1 - island;
-        //if (idist < 0)
-            //RUNTIME();
-        edges[i][n].dist = idist;
         edges[n][i].dist = idist;
+        edges[n][i + O].dist = idist; edges[n][i + O].cap = 0;
+        edges[i][n].dist = idist; edges[i][n].cap = 0;
+        edges[i + O][n].dist = idist; edges[i + O][n].cap = 0;
 
         // Lake
         ll ldist = lake - euclidean(stones[i].first, stones[i].second, 1) - 1;
-        if (ldist < 0)
-            RUNTIME();
-        edges[i][n+1].dist = ldist;
-        edges[n+1][i].dist = ldist;
+        edges[i + O][n+1].dist = ldist;
+        edges[i][n + 1].dist = MAXW;
+        edges[n+1][i].dist = MAXW;
+        edges[n+1][i + O].dist = MAXW;
     }
 
-    edges[n][n+1].dist = lake - island;
-    edges[n+1][n].dist = lake - island;
-    edges[n][n+1].cap = 10;
-    edges[n+1][n].cap = 10;
+    edges[n][n+1].dist = MAXW;
+    edges[n+1][n].dist = MAXW;
+    edges[n][n+1].cap = 0;
+    edges[n+1][n].cap = 0;
+
+    for (int i = 0; i < n; i++)
+    {
+        edges[i][i + O].dist = 0;
+        edges[i][i + O].cap = 1;
+        edges[i + O][i].dist = 0;
+        edges[i + O][i].cap = 0;
+    }
 
     int l = 0, r = 1000000001;
     while (r - l > 1)
